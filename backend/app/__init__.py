@@ -1,2 +1,5 @@
-"""FastAPI application package for the e-commerce server."""
+"""
+E-Commerce AI Platform Backend
+"""
 
+__version__ = "0.1.0"
