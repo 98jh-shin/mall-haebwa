@@ -57,18 +57,18 @@ const filterSections = [
 
 const featuredProducts = [
   {
-    title: "[밀키트] 흥닭 김치찌개 요리재료 350G",
+    title: "금돼지식당 김치찌개",
     brand: "SwiftCart 지금배송",
     price: "5,590원",
     rating: 4.89,
     reviewCount: 28,
     coupon: null,
     image:
-      "https://images.unsplash.com/photo-1610602925036-1d81bb50065a?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTh8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://product-image.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/product/image/a695cf27-81b4-4ac2-8683-da431feedb75.jpeg",
     badges: ["지금배송"],
   },
   {
-    title: "프레시킷 캠핑 포차 김치어묵 우동전골 2인분",
+    title: "수제 김치찌개 2종",
     brand: "프레시킷",
     price: "12,400원",
     originalPrice: "18,900원",
@@ -77,23 +77,23 @@ const featuredProducts = [
     rating: 4.87,
     reviewCount: 1023,
     image:
-      "https://images.unsplash.com/photo-1708388064278-707e85eaddc0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8a2ltY2hpfGVufDB8fDB8fHww&auto=format&fit=crop&w=400&q=80",
+      "https://img-cf.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/shop/data/goods/1555917574617l0.jpg",
     badges: ["공식", "적립", "빠른배송"],
   },
   {
-    title: "식당전용 오모가리 김치찌개 무료레시피 제공",
+    title: "오모가리 한돈김치찌개",
     brand: "채움당 식품",
-    price: "99,000원",
-    originalPrice: "121,700원",
+    price: "99,00원",
+    originalPrice: "121,70원",
     discount: "18%",
     rating: 4.82,
     reviewCount: 28,
     image:
-      "https://images.unsplash.com/photo-1706468238786-63e6a4c814eb?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTl8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://product-image.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/product/image/d61eb876-e982-49ab-adba-2c34d73c6a97.jpg",
     badges: ["무료배송"],
   },
   {
-    title: "호양대디자인 롯데푸드 런천미트 갈릭라우 쉬운조리",
+    title: "참치김치찌개",
     brand: "롯데푸드추천",
     price: "28,340원",
     originalPrice: "35,430원",
@@ -102,31 +102,31 @@ const featuredProducts = [
     rating: 4.9,
     reviewCount: 13307,
     image:
-      "https://images.unsplash.com/photo-1699572583192-837d1b848cb7?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MjZ8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://img-cf.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/shop/data/goods/1547447500560l0.jpg",
     badges: ["무료배송"],
   },
 ];
 
 const productResults = [
   {
-    title: "육수 한알 사골큐브 1.81kg 부대찌개/김치찌개",
+    title: "돼지고기 김치찌개",
     brand: "율문푸드",
     price: "22,700원",
     shipping: "3,000원",
     discount: "10%",
     image:
-      "https://images.unsplash.com/photo-1703046598921-01b2b97bcafa?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTB8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://product-image.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/product/image/3a39249e-58d6-4497-a096-6f897fafbadc.jpg",
     rating: 5.0,
     reviewCount: 51,
   },
   {
-    title: "whatsotv 국내산 한돈 돼지고기 캠핑용 진한 찌개세트",
+    title: "[호밍스] 사골 김치찌개 450g",
     brand: "whatsotv",
     price: "17,500원",
     shipping: "3,000원",
     discount: null,
     image:
-      "https://images.unsplash.com/photo-1583224944844-5b268c057b72?ixid=M3wxMjA3fDB8MXxzZWFyY2h8NHx8a2ltY2hpfGVufDB8fHx8MTc2MTUzOTgzMnww&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://product-image.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/product/image/1ba47358-6395-48d2-9111-f22a3a066d60.jpg",
     rating: 4.87,
     reviewCount: 312,
   },
@@ -137,7 +137,7 @@ const productResults = [
     shipping: "무료배송",
     discount: "28%",
     image:
-      "https://images.unsplash.com/photo-1708388065149-1304dec1f0ec?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTF8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://product-image.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/product/image/09b5e358-844b-4498-b475-b0de67e08a0f.jpg",
     rating: 4.73,
     reviewCount: 671,
   },
@@ -148,7 +148,7 @@ const productResults = [
     shipping: "무료배송",
     discount: "25%",
     image:
-      "https://images.unsplash.com/photo-1616787928056-ae5ab4b649d8?ixid=M3wxMjA3fDB8MXxzZWFyY2h8N3x8a2ltY2hpfGVufDB8fHx8MTc2MTUzOTgzMnww&ixlib=rb-4.1.0&auto=format&fit=crop&w=400&q=80",
+      "https://img-cf.kurly.com/hdims/resize/%5E%3E360x%3E468/cropcenter/360x468/quality/85/src/shop/data/goods/165397417783l0.jpg",
     rating: 4.91,
     reviewCount: 128,
   },
@@ -208,8 +208,7 @@ export default function SearchPage() {
                   chip.active
                     ? "bg-emerald-500 text-neutral-900"
                     : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
-                }`}
-              >
+                }`}>
                 {chip.label}
               </button>
             ))}
@@ -221,8 +220,8 @@ export default function SearchPage() {
               <ChevronRight className="size-4 text-neutral-400" />
             </span>
             <span className="text-xs text-neutral-400">
-              현재 검색어:{" "}
-              <strong className="text-neutral-700">{query}</strong> · 카테고리{" "}
+              현재 검색어: <strong className="text-neutral-700">{query}</strong>{" "}
+              · 카테고리{" "}
               <strong className="text-neutral-700">{category}</strong>
             </span>
           </div>
@@ -254,8 +253,7 @@ export default function SearchPage() {
               {featuredProducts.map((product) => (
                 <article
                   key={product.title}
-                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200"
-                >
+                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200">
                   <div className="relative h-40 w-full overflow-hidden">
                     <img
                       src={product.image}
@@ -301,15 +299,16 @@ export default function SearchPage() {
                         <span className="font-semibold text-neutral-700">
                           {product.rating}
                         </span>
-                        <span>· 리뷰 {product.reviewCount.toLocaleString()}</span>
+                        <span>
+                          · 리뷰 {product.reviewCount.toLocaleString()}
+                        </span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {product.badges?.map((badge) => (
                         <span
                           key={badge}
-                          className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold text-neutral-600"
-                        >
+                          className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold text-neutral-600">
                           {badge}
                         </span>
                       ))}
@@ -333,8 +332,7 @@ export default function SearchPage() {
                 {productResults.map((product) => (
                   <article
                     key={product.title}
-                    className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 transition hover:-translate-y-1 hover:shadow-lg"
-                  >
+                    className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 transition hover:-translate-y-1 hover:shadow-lg">
                     <div className="relative h-40 w-full overflow-hidden">
                       <img
                         src={product.image}

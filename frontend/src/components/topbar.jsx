@@ -125,11 +125,11 @@ export default function TopBar({ onSearch = () => {} }) {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 lg:px-6">
         <div className="flex items-center justify-between text-[11px] text-neutral-500">
           <div className="flex items-center gap-3">
-            <span className="font-semibold tracking-[0.35em] text-neutral-600">
-              SwiftCart
+            <span className="font-semibold tracking-[0.1em] text-neutral-600 font-['Tenada']">
+              Mall 해봐
             </span>
             <span className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-0.5">
-              <span className="text-xs font-semibold text-emerald-500">SC</span>
+              <span className="text-xs font-semibold text-emerald-500">M</span>
             </span>
           </div>
           {session.token ? (
@@ -165,9 +165,9 @@ export default function TopBar({ onSearch = () => {} }) {
             href="/"
             className="flex items-center gap-2 text-xl font-semibold text-emerald-600">
             <span className="grid h-8 w-8 place-items-center rounded-md bg-emerald-500 text-white">
-              SC
+              M
             </span>
-            <span className="text-neutral-900">스토어</span>
+            <span className="text-neutral-900 font-['Tenada']">Mall해봐</span>
           </a>
 
           <div className="flex min-w-[260px] flex-1 justify-center md:order-none">

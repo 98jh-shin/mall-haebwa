@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(
     location.state?.justRegistered
       ? "회원가입이 완료되었습니다. 방금 등록한 정보로 로그인해 주세요."
-      : null,
+      : null
   );
   const [activeTab, setActiveTab] = useState("id");
   const [remember, setRemember] = useState(true);
@@ -79,8 +79,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-12">
         <div className="mb-8 text-center">
-          <p className="text-4xl font-black tracking-[0.1em] text-emerald-500">
-            SwiftCart
+          <p className="text-4xl font-black tracking-[0.07em] text-emerald-500 font-['Tenada']">
+            Mall 해봐
           </p>
         </div>
 
@@ -148,7 +148,7 @@ export default function LoginPage() {
                     remember
                       ? "bg-emerald-500 text-white"
                       : "bg-neutral-100 text-neutral-400"
-                    }`}>
+                  }`}>
                   ✓
                 </span>
                 로그인 상태 유지

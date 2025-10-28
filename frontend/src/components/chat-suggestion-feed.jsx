@@ -15,14 +15,6 @@ const ingredients = [
   "신선한 두부 1모",
   "대파 다짐팩",
   "다진마늘 200g",
-  "청양고추 10입",
-  "양파 3입",
-  "국산 참기름",
-  "김치찌개용 김치 1kg",
-  "국산 새우젓",
-  "황태채 200g",
-  "감자 2입",
-  "표고버섯 5입",
 ];
 
 const descFragments = [
@@ -36,19 +28,37 @@ const descFragments = [
   "다양한 찌개나 국물 요리에 활용해보세요.",
 ];
 
-const imagePool = [
-  "https://images.unsplash.com/photo-1703046598921-01b2b97bcafa?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTB8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=640&q=80",
-  "https://images.unsplash.com/photo-1708388064278-707e85eaddc0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8a2ltY2hpfGVufDB8fDB8fHww&auto=format&fit=crop&w=640&q=80",
-  "https://images.unsplash.com/photo-1708388065149-1304dec1f0ec?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTF8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=640&q=80",
-  "https://images.unsplash.com/photo-1706468238786-63e6a4c814eb?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTl8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=640&q=80",
-  "https://images.unsplash.com/photo-1610602925036-1d81bb50065a?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTh8fGtpbWNoaXxlbnwwfHx8fDE3NjE1Mzk4MzJ8MA&ixlib=rb-4.1.0&auto=format&fit=crop&w=640&q=80",
-  "https://images.unsplash.com/photo-1583224944844-5b268c057b72?ixid=M3wxMjA3fDB8MXxzZWFyY2h8NHx8a2ltY2hpfGVufDB8fHx8MTc2MTUzOTgzMnww&ixlib=rb-4.1.0&auto=format&fit=crop&w=640&q=80",
-];
+const imagePool = {
+  "국산 배추 1포기":
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTk2vEIXsJahuko9_RAsa6y_Vss54tKrGW2AT-yjCH4kc7So6dKEnV0BPUUUvSEUx438eLyxeWl_cGDfkxiCplx9VL0oosp7IdNz84Q7Fo&usqp=CAc",
+  "김장용 절임배추 5kg":
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTk2vEIXsJahuko9_RAsa6y_Vss54tKrGW2AT-yjCH4kc7So6dKEnV0BPUUUvSEUx438eLyxeWl_cGDfkxiCplx9VL0oosp7IdNz84Q7Fo&usqp=CAc",
+  "한돈 삼겹살 300g":
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRbu7vVyUsTbaFnUhFJdAC2DYBfxesUkSFwaO0F-4-JNWddPddpddb0rbHWy8ReOMbW4jBx2dN7ElDziUw5xe8G9iDFjAw3bgfCSB6T9kpK2ecmjgCA8hpO&usqp=CAc",
+  "돼지 앞다리 250g":
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRbu7vVyUsTbaFnUhFJdAC2DYBfxesUkSFwaO0F-4-JNWddPddpddb0rbHWy8ReOMbW4jBx2dN7ElDziUw5xe8G9iDFjAw3bgfCSB6T9kpK2ecmjgCA8hpO&usqp=CAc",
+  "한우 사골 육수팩":
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQl0Fb2hNpBfQqbxXDdnsue1NmUoDSTDOlwPCnCgAjm8ju8WI1KUgOJLUdZ04JIeqWDX6By0a5RLZwRuVYJAj8Q6ZAsI-vvas9LPmYKbiD2ZHevuwqkeADBThNdP8pC2cKrxutcSg&usqp=CAc",
+  "멸치 다시팩 10입":
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQl0Fb2hNpBfQqbxXDdnsue1NmUoDSTDOlwPCnCgAjm8ju8WI1KUgOJLUdZ04JIeqWDX6By0a5RLZwRuVYJAj8Q6ZAsI-vvas9LPmYKbiD2ZHevuwqkeADBThNdP8pC2cKrxutcSg&usqp=CAc",
+  "재래식 청국장":
+    "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRMHPpoX-KqEwqRnzM6Jyb3GQzFL3rugtcm4POmj5z_sOADr2KYcaE3cB3F2skpa1Mjc4sTJGHhSmDIVTJDVr7rff8OebGaa_np-14C9LOSr-IecoMK3CLDFrC9UemcuGNMnUzVDw&usqp=CAc",
+  "전통 고추장 500g":
+    "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRKyS7s0MhQPULYeKrx2Gi7VVA1Lp8jz7ZrHgiYOBVEEpgR9mQCaEGI0ZvU4cQtqpz6FIu_Alhc7RHRSo-py7Xd7zQmvn-aSEXM1FkdAADaGyct6CXvxP3tNPlzObhuWDbLaIpxXZ8&usqp=CAc",
+  "고춧가루 태양초 200g":
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRH1YiediGH_SxklAdZo8Mp_mxHVt098PcbqA&s",
+  "신선한 두부 1모":
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkJgX4n_2YY3WczYizX19cuQ0xxL32SCPpig&s",
+  "대파 다짐팩":
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFIdz2JHJef0PxvVdJ06YWKKd95jBEGnYdmg&s",
+  "다진마늘 200g":
+    "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSAGYyFIbdQdw73FtqnOX5P3RoorGCkcCHVgDzv_3Z8n26BcCoVdj2kY7bC7yaPD8VenHpbwnD5WCZTuesPw1C7qDHI0zHwhM22BcT_dQS1wMU7H_Vkp5Chb7bw0M0SlcKsbJvoKV0&usqp=CAc",
+};
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1583224964978-2257b960c3d3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8a2ltY2hpfGVufDB8fDB8fHww&auto=format&fit=crop&w=640&q=80";
 
-const storeNames = ['SwiftCart 마켓', 'SwiftCart 프레시', 'SwiftCart 장보기'];
+const storeNames = ["SwiftCart 마켓", "SwiftCart 프레시", "SwiftCart 장보기"];
 
 const shippingOptions = ["무료배송", "오늘출발", "새벽배송", "3,000원"];
 
@@ -59,6 +69,7 @@ function pickRandom(array) {
 }
 
 function generateSuggestion(id) {
+  const name = pickRandom(ingredients); // 랜덤 재료 하나 뽑기
   const basePrice = Math.floor(Math.random() * 15000) + 3000;
   const sale = Math.random() > 0.6 ? Math.floor(Math.random() * 15) + 5 : 0;
   const salePrice =
@@ -68,9 +79,9 @@ function generateSuggestion(id) {
 
   return {
     id,
-    name: pickRandom(ingredients),
+    name: name,
     description: `${pickRandom(descFragments)} ${pickRandom(descFragments)}`,
-    image: pickRandom(imagePool),
+    image: imagePool[name], // ✅ 이름으로 접근 + fallback
     store: pickRandom(storeNames),
     price: formatter.format(basePrice),
     salePrice: formatter.format(salePrice),
@@ -128,7 +139,7 @@ export default function ChatSuggestionFeed({ topic }) {
               <img
                 src={item.image}
                 alt={item.name}
-                className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                className="h-full w-full object-contain transition duration-500 hover:scale-105"
                 onError={(event) => {
                   event.currentTarget.src = fallbackImage;
                   event.currentTarget.onerror = null;
@@ -187,4 +198,3 @@ export default function ChatSuggestionFeed({ topic }) {
     </section>
   );
 }
-

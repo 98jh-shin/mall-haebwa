@@ -28,7 +28,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <TopBar onSearch={handleSearch} />
       <main className="pb-16">
         <PromoCarousel />
@@ -37,3 +37,4 @@ export default function HomePage() {
     </div>
   );
 }
+// bg-neutral-50

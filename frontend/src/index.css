@@ -15,3 +15,7 @@
     @apply min-h-screen bg-neutral-50;
   }
 }
+@font-face {
+  font-family: "Tenada";
+  src: url("../public/Fonts/Pretendard-ExtraBold.ttf") format("truetype");
+}
