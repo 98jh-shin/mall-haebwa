@@ -3,7 +3,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database import close_mongo_connection, connect_to_mongo
 from app.routers import admin, auth, home, orders, product, search
+from app.seed import ensure_seed_products, ensure_seed_users
 
 app = FastAPI(
     title="Eco Demo E-Commerce API",
@@ -18,6 +20,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialise the Mongo connection and seed the catalogue."""
+    db = await connect_to_mongo()
+    await ensure_seed_products(db)
+    await ensure_seed_users(db)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close the Mongo connection pool when the app stops."""
+    await close_mongo_connection()
+
 
 app.include_router(home.router)
 app.include_router(auth.router)

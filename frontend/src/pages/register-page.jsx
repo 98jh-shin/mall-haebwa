@@ -1,18 +1,31 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-const INTEREST_OPTIONS = [
-  "테크",
-  "패션",
-  "리빙",
-  "뷰티",
-  "푸드",
-  "여행",
-];
+const INTEREST_OPTIONS = ["테크", "패션", "리빙", "뷰티", "푸드", "여행"];
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+  const redirectTimeoutRef = useRef(null);
   const [selectedInterests, setSelectedInterests] = useState(new Set());
   const [agreeMarketing, setAgreeMarketing] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const toggleInterest = (interest) => {
     setSelectedInterests((prev) => {
@@ -26,35 +39,101 @@ export default function RegisterPage() {
     });
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submitting) return;
+
+    const normalisedEmail = email.trim().toLowerCase();
+    if (!normalisedEmail) {
+      setError("이메일을 입력해주세요.");
+      setSuccess(null);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalisedEmail)) {
+      setError("올바른 이메일 형식을 확인해주세요.");
+      setSuccess(null);
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError("비밀번호는 6자 이상이어야 합니다.");
+      setSuccess(null);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("비밀번호가 서로 일치하지 않습니다.");
+      setSuccess(null);
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: normalisedEmail,
+          password,
+          full_name: fullName.trim() || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(
+          payload.detail || "회원가입 처리 중 오류가 발생했습니다.",
+        );
+      }
+
+      const data = await response.json();
+      setSuccess("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+      redirectTimeoutRef.current = setTimeout(() => {
+        navigate("/login", {
+          replace: true,
+          state: { email: data.email, justRegistered: true },
+        });
+      }, 1200);
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-12">
         <div className="mb-8 text-center">
-          <p className="text-4xl font-black tracking-[0.6em] text-emerald-500">
-            NAVER
+          <p className="text-4xl font-black tracking-[0.1em] text-emerald-500">
+            SwiftCart
           </p>
           <p className="mt-3 text-sm text-neutral-500">
-            단 한 번의 가입으로 모든 네이버 서비스를 이용해보세요.
+            단 한 번의 가입으로 모든 SwiftCart 서비스를 이용해보세요.
           </p>
         </div>
 
         <div className="grid w-full max-w-4xl gap-8 rounded-[40px] bg-white p-10 shadow-2xl shadow-emerald-100/60 lg:grid-cols-[1.1fr_0.9fr]">
-          <form
-            onSubmit={(event) => event.preventDefault()}
-            className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
               <label className="text-sm font-semibold text-neutral-600">
-                아이디
+                이메일
               </label>
               <div className="mt-2 flex h-12 items-center rounded-3xl border border-emerald-300 px-4 shadow-inner shadow-emerald-50 focus-within:border-emerald-500 focus-within:ring focus-within:ring-emerald-200/60">
                 <input
-                  type="text"
-                  placeholder="아이디를 입력하세요"
-                  className="h-full flex-1 border-0 bg-transparent text-sm text-neutral-800 outline-none"
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    setError(null);
+                    setSuccess(null);
+                  }}
+                  placeholder="name@example.com"
+                  className="h-full w-full border-0 bg-transparent text-sm text-neutral-800 outline-none"
+                  autoComplete="email"
+                  required
                 />
-                <span className="text-sm font-semibold text-neutral-300">
-                  @naver.com
-                </span>
               </div>
             </div>
 
@@ -64,8 +143,16 @@ export default function RegisterPage() {
               </label>
               <input
                 type="password"
-                placeholder="영문, 숫자, 특수문자 조합 8자 이상"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setError(null);
+                  setSuccess(null);
+                }}
+                placeholder="영문, 숫자, 특수문자 조합 6자 이상"
                 className="mt-2 h-12 w-full rounded-3xl border border-emerald-200 px-4 text-sm text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
+                autoComplete="new-password"
+                required
               />
             </div>
 
@@ -75,8 +162,16 @@ export default function RegisterPage() {
               </label>
               <input
                 type="password"
+                value={confirmPassword}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value);
+                  setError(null);
+                  setSuccess(null);
+                }}
                 placeholder="비밀번호를 다시 입력하세요"
                 className="mt-2 h-12 w-full rounded-3xl border border-emerald-200 px-4 text-sm text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
+                autoComplete="new-password"
+                required
               />
             </div>
 
@@ -87,8 +182,11 @@ export default function RegisterPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="이름"
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  placeholder="이름 (선택 사항)"
                   className="mt-2 h-12 w-full rounded-3xl border border-emerald-200 px-4 text-sm text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
+                  autoComplete="name"
                 />
               </div>
 
@@ -98,12 +196,14 @@ export default function RegisterPage() {
                 </label>
                 <input
                   type="date"
+                  value={birthDate}
+                  onChange={(event) => setBirthDate(event.target.value)}
                   className="mt-2 h-12 w-full rounded-3xl border border-emerald-200 px-4 text-sm text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
                 />
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="text-sm font-semibold text-neutral-600">
                 휴대전화
               </label>
@@ -132,12 +232,29 @@ export default function RegisterPage() {
                   className="h-12 rounded-3xl border border-emerald-200 px-4 text-sm text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
                 />
               </div>
-            </div>
+            </div> */}
+
+            {error ? (
+              <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+                {error}
+              </div>
+            ) : null}
+
+            {success ? (
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-600">
+                {success}
+              </div>
+            ) : null}
 
             <button
               type="submit"
-              className="mt-2 h-12 rounded-3xl bg-emerald-500 text-sm font-semibold text-white transition hover:bg-emerald-600">
-              가입 완료
+              disabled={submitting}
+              className={`mt-2 h-12 rounded-3xl text-sm font-semibold text-white transition ${
+                submitting
+                  ? "bg-emerald-300"
+                  : "bg-emerald-500 hover:bg-emerald-600"
+              }`}>
+              {submitting ? "가입 처리 중..." : "가입 완료"}
             </button>
           </form>
 
@@ -147,8 +264,8 @@ export default function RegisterPage() {
                 취향을 더 정확하게
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-                관심 있는 카테고리를 선택하면 맞춤형 추천과 쇼핑 혜택을
-                빠르게 받아볼 수 있어요.
+                관심 있는 카테고리를 선택하면 맞춤형 추천과 쇼핑 혜택을 빠르게
+                받아볼 수 있어요.
               </p>
             </div>
 
@@ -189,7 +306,9 @@ export default function RegisterPage() {
               }`}>
               <span
                 className={`grid size-5 place-items-center rounded-full text-[11px] font-bold ${
-                  agreeMarketing ? "bg-emerald-500 text-white" : "bg-neutral-200 text-neutral-500"
+                  agreeMarketing
+                    ? "bg-emerald-500 text-white"
+                    : "bg-neutral-200 text-neutral-500"
                 }`}>
                 ✓
               </span>
@@ -220,4 +339,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

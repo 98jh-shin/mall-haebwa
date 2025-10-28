@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -7,7 +7,15 @@ import {
   UserRound,
   ShoppingBag,
   ChevronRight,
+  PackagePlus,
 } from "lucide-react";
+import {
+  AUTH_EVENT,
+  clearAuthSession,
+  getAccessToken,
+  getUserEmail,
+  getUserRole,
+} from "../utils/auth";
 
 const CATEGORY_OPTIONS = [
   "전체",
@@ -23,28 +31,28 @@ const CATEGORY_OPTIONS = [
 
 const NAV_LINKS = [
   { label: "홈", variant: "primary" },
-  { label: "웰다 D-2", badge: "D-2" },
+  // { label: "웰다 D-2", badge: "D-2" },
   { label: "오늘꿀딜" },
-  { label: "컬리N마트" },
+  // { label: "컬리N마트" },
   { label: "베스트" },
   { label: "공식 인증 명품" },
-  { label: "N배송" },
-  { label: "슈퍼적립" },
-  { label: "쇼핑 라이브" },
-  { label: "지금배달" },
+  // { label: "N배송" },
+  // { label: "슈퍼적립" },
+  // { label: "쇼핑 라이브" },
+  // { label: "지금배달" },
   { label: "선물샵" },
   { label: "패션뷰티" },
   { label: "푸드윈도" },
   { label: "럭셔리" },
   { label: "미스터" },
   { label: "기획전" },
-  { label: "쿠폰" },
+  // { label: "쿠폰" },
 ];
 
-const QUICK_LINKS = [
-  { label: "카테고리", Icon: Grid3X3 },
-  { label: "마이쇼핑", Icon: UserRound },
-  { label: "장바구니", Icon: ShoppingBag },
+const BASE_QUICK_LINKS = [
+  // { label: "카테고리", Icon: Grid3X3, href: "#" },
+  { label: "마이쇼핑", Icon: UserRound, to: "/my" },
+  { label: "장바구니", Icon: ShoppingBag, to: "/cart" },
 ];
 
 export default function TopBar({ onSearch = () => {} }) {
@@ -52,6 +60,35 @@ export default function TopBar({ onSearch = () => {} }) {
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_OPTIONS[0]);
   const [openCategory, setOpenCategory] = useState(false);
   const dropdownRef = useRef(null);
+  const [session, setSession] = useState(() => ({
+    token: getAccessToken(),
+    email: getUserEmail(),
+    role: getUserRole(),
+  }));
+
+  useEffect(() => {
+    const syncSession = () => {
+      setSession({
+        token: getAccessToken(),
+        email: getUserEmail(),
+        role: getUserRole(),
+      });
+    };
+    window.addEventListener(AUTH_EVENT, syncSession);
+    return () => window.removeEventListener(AUTH_EVENT, syncSession);
+  }, []);
+
+  const isAdmin = session.role === "admin";
+
+  const quickLinks = useMemo(() => {
+    if (isAdmin) {
+      return [
+        ...BASE_QUICK_LINKS,
+        { label: "상품 등록", Icon: PackagePlus, to: "/admin/products/create" },
+      ];
+    }
+    return BASE_QUICK_LINKS;
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!openCategory) return;
@@ -72,6 +109,17 @@ export default function TopBar({ onSearch = () => {} }) {
     onSearch(trimmed, selectedCategory);
   };
 
+  const handleLogout = () => {
+    clearAuthSession();
+    setSession({
+      token: null,
+      email: null,
+      role: null,
+    });
+  };
+
+  const displayName = session.email || (isAdmin ? "관리자" : "SwiftCart 회원");
+
   return (
     <header className="w-full border-b border-neutral-200 bg-white text-neutral-800">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 lg:px-6">
@@ -84,14 +132,37 @@ export default function TopBar({ onSearch = () => {} }) {
               <span className="text-xs font-semibold text-emerald-500">SC</span>
             </span>
           </div>
-          <Link to="/login" className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-700">
-            �α���
-          </Link>
+          {session.token ? (
+            <div className="flex items-center gap-2 text-xs text-neutral-500">
+              <span className="rounded-full bg-neutral-100 px-3 py-1 font-semibold text-neutral-600">
+                {displayName}
+              </span>
+              {isAdmin ? (
+                <Link
+                  to="/admin/products/create"
+                  className="rounded-full border border-emerald-200 px-3 py-1 font-semibold text-emerald-600 transition hover:border-emerald-300 hover:text-emerald-700">
+                  상품 등록
+                </Link>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-neutral-200 px-3 py-1 font-medium text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-700">
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-700">
+              로그인 / 회원가입
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
           <a
-            href="#"
+            href="/"
             className="flex items-center gap-2 text-xl font-semibold text-emerald-600">
             <span className="grid h-8 w-8 place-items-center rounded-md bg-emerald-500 text-white">
               SC
@@ -174,17 +245,32 @@ export default function TopBar({ onSearch = () => {} }) {
           </div>
 
           <nav className="flex items-center justify-end gap-4 md:ml-auto">
-            {QUICK_LINKS.map(({ label, Icon }) => (
-              <a
-                key={label}
-                href="#"
-                className="flex flex-col items-center gap-1 text-xs text-neutral-500 transition hover:text-purple-600">
-                <span className="grid size-9 place-items-center rounded-full border border-neutral-200 text-neutral-600 transition hover:border-purple-400">
-                  <Icon className="size-4" />
-                </span>
-                {label}
-              </a>
-            ))}
+            {quickLinks.map(({ label, Icon, to, href = "#" }) => {
+              const content = (
+                <>
+                  <span className="grid size-9 place-items-center rounded-full border border-neutral-200 text-neutral-600 transition hover:border-purple-400">
+                    <Icon className="size-4" />
+                  </span>
+                  {label}
+                </>
+              );
+
+              return to ? (
+                <Link
+                  key={label}
+                  to={to}
+                  className="flex flex-col items-center gap-1 text-xs text-neutral-500 transition hover:text-purple-600">
+                  {content}
+                </Link>
+              ) : (
+                <a
+                  key={label}
+                  href={href}
+                  className="flex flex-col items-center gap-1 text-xs text-neutral-500 transition hover:text-purple-600">
+                  {content}
+                </a>
+              );
+            })}
           </nav>
         </div>
       </div>
@@ -220,4 +306,3 @@ export default function TopBar({ onSearch = () => {} }) {
     </header>
   );
 }
-

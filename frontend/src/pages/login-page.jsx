@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { setAuthSession } from "../utils/auth";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const TAB_OPTIONS = [
   { key: "id", label: "ID/비밀번호" },
@@ -8,9 +12,68 @@ const TAB_OPTIONS = [
 ];
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const initialEmail =
+    typeof location.state?.email === "string" ? location.state.email : "";
+  const [success, setSuccess] = useState(
+    location.state?.justRegistered
+      ? "회원가입이 완료되었습니다. 방금 등록한 정보로 로그인해 주세요."
+      : null,
+  );
   const [activeTab, setActiveTab] = useState("id");
   const [remember, setRemember] = useState(true);
   const [ipSecurity, setIpSecurity] = useState(true);
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submitting) return;
+
+    const normalisedEmail = email.trim().toLowerCase();
+    if (!normalisedEmail || !password) {
+      setError("아이디와 비밀번호를 입력해주세요.");
+      setSuccess(null);
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: normalisedEmail,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || "로그인에 실패했습니다.");
+      }
+
+      const data = await response.json();
+      setAuthSession({
+        token: data.access_token,
+        userId: data.user_id,
+        remember,
+        email: data.email,
+        role: data.role,
+      });
+      navigate("/");
+    } catch (fetchError) {
+      setError(fetchError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
@@ -38,15 +101,20 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <form
-            className="mt-8 flex flex-col gap-5"
-            onSubmit={(event) => event.preventDefault()}>
+          <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-medium text-neutral-600">
               아이디
               <input
                 type="text"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setError(null);
+                  setSuccess(null);
+                }}
                 placeholder="아이디"
                 className="h-12 rounded-2xl border border-emerald-400/70 px-4 text-neutral-800 shadow-inner shadow-emerald-100 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
+                autoComplete="email"
               />
             </label>
 
@@ -54,8 +122,15 @@ export default function LoginPage() {
               비밀번호
               <input
                 type="password"
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setError(null);
+                  setSuccess(null);
+                }}
                 placeholder="비밀번호"
                 className="h-12 rounded-2xl border border-emerald-300 px-4 text-neutral-800 shadow-inner shadow-emerald-50 outline-none transition focus:border-emerald-500 focus:ring focus:ring-emerald-200/60"
+                autoComplete="current-password"
               />
             </label>
 
@@ -73,7 +148,7 @@ export default function LoginPage() {
                     remember
                       ? "bg-emerald-500 text-white"
                       : "bg-neutral-100 text-neutral-400"
-                  }`}>
+                    }`}>
                   ✓
                 </span>
                 로그인 상태 유지
@@ -101,10 +176,27 @@ export default function LoginPage() {
               </button>
             </div>
 
+            {success ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-600">
+                {success}
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600">
+                {error}
+              </div>
+            ) : null}
+
             <button
               type="submit"
-              className="mt-2 h-12 rounded-2xl bg-emerald-500 text-sm font-semibold text-white transition hover:bg-emerald-600">
-              로그인
+              disabled={submitting}
+              className={`mt-2 h-12 rounded-2xl text-sm font-semibold text-white transition ${
+                submitting
+                  ? "bg-emerald-300"
+                  : "bg-emerald-500 hover:bg-emerald-600"
+              }`}>
+              {submitting ? "로그인 중..." : "로그인"}
             </button>
 
             <button
