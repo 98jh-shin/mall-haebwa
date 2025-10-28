@@ -22,13 +22,13 @@ def _extract_token(authorization: Optional[str]) -> str:
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="인증 토큰이 필요합니다.",
+            detail="���� ��ū�� �ʿ��մϴ�.",
         )
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer" or not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Bearer 토큰 형식이 올바르지 않습니다.",
+            detail="�ùٸ� ���� ��ū�� �ʿ��մϴ�.",
         )
     return token.strip()
 
@@ -41,19 +41,19 @@ async def require_admin(authorization: Optional[str] = Header(None)) -> Dict[str
     except TokenDecodeError as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="토큰을 검증할 수 없습니다.",
+            detail="���� ��ū�� �ߺ��� Ȯ���Ҽ� �����ϴ�.",
         ) from error
 
     role = str(payload.get("role", "")).lower()
     if role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="관리자 권한이 필요합니다.",
+            detail="������ ������ �ʿ��մϴ�.",
         )
     return payload
 
 
-@router.get("", summary="관리자 대시보드")
+@router.get("", summary="������ ��ú���")
 async def admin_dashboard():
     """Return high-level metrics for the admin dashboard."""
     return {
@@ -67,7 +67,7 @@ async def admin_dashboard():
     "/products",
     response_model=AdminActionResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="상품 생성",
+    summary="��ǰ ����",
 )
 async def create_product(
     payload: ProductCreateRequest,
@@ -78,18 +78,17 @@ async def create_product(
     if payload.sale_price and payload.sale_price >= payload.price:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="세일 가격은 기본 가격보다 낮아야 합니다.",
+            detail="���� �ǸŰ��� ���� �ǸŰ����� ���ƾ� �մϴ�.",
         )
     if payload.status not in VALID_PRODUCT_STATUSES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="허용되지 않는 상품 상태입니다.",
+            detail="�������� �ʴ� ��ǰ �����Դϴ�.",
         )
 
     now = datetime.utcnow()
     product = payload.dict()
     product_id = str(uuid4())
-    recommendation_reason = product.get("recommendation_reason") or "신규 등록 상품"
 
     product.update(
         {
@@ -97,8 +96,7 @@ async def create_product(
             "sku": product.get("sku") or None,
             "barcode": product.get("barcode") or None,
             "sale_price": product.get("sale_price") or None,
-            "is_recommended": True,
-            "recommendation_reason": recommendation_reason,
+            "recommendation_reason": product.get("recommendation_reason") or None,
             "tags": [tag for tag in product.get("tags", []) if tag],
             "keywords": [keyword for keyword in product.get("keywords", []) if keyword],
             "gallery": [str(url) for url in product.get("gallery", []) if url],
@@ -112,6 +110,6 @@ async def create_product(
 
     return AdminActionResponse(
         status="success",
-        message="상품이 생성되었습니다.",
+        message="��ǰ�� ��ϵǾ����ϴ�.",
         data={"product_id": product_id},
     )

@@ -7,8 +7,6 @@ from typing import Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from app.seed import ensure_seed_users
-
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 MONGODB_DB = os.getenv("MONGODB_DB", "eco_demo")
 
@@ -65,16 +63,5 @@ async def get_db() -> AsyncIOMotorDatabase:
     application startup cycle (e.g., during tests).
     """
     if _db is None:
-        db = await connect_to_mongo()
-    else:
-        db = _db
-
-    await _ensure_admin_seed(db)
-    return db
-
-
-async def _ensure_admin_seed(db: AsyncIOMotorDatabase) -> None:
-    """Ensure the default admin account exists after the user collection is cleared."""
-    existing_admin = await db["users"].find_one({"role": "admin"})
-    if existing_admin is None:
-        await ensure_seed_users(db)
+        return await connect_to_mongo()
+    return _db

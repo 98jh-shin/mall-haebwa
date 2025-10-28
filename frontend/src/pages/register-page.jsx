@@ -83,7 +83,7 @@ export default function RegisterPage() {
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
         throw new Error(
-          payload.detail || "회원가입 처리 중 오류가 발생했습니다."
+          payload.detail || "회원가입 처리 중 오류가 발생했습니다.",
         );
       }
 
@@ -106,11 +106,11 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-12">
         <div className="mb-8 text-center">
-          <p className="text-4xl font-black tracking-[0.15em] text-emerald-500 font-['Tenada']">
-            Mall 해봐
+          <p className="text-4xl font-black tracking-[0.1em] text-emerald-500">
+            SwiftCart
           </p>
           <p className="mt-3 text-sm text-neutral-500">
-            단 한 번의 가입으로 모든 Mall해봐 서비스를 이용해보세요.
+            단 한 번의 가입으로 모든 SwiftCart 서비스를 이용해보세요.
           </p>
         </div>
 
@@ -291,7 +291,7 @@ export default function RegisterPage() {
             <div className="rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-xs leading-relaxed text-neutral-500">
               <p className="font-semibold text-neutral-600">필수 약관 안내</p>
               <p className="mt-1">
-                서비스 이용약관과 개인정보 수집 및 이용에 관한 안내를
+                네이버 서비스 이용약관과 개인정보 수집 및 이용에 관한 안내를
                 확인했으며, 모두 동의합니다.
               </p>
             </div>

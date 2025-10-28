@@ -7,7 +7,6 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pymongo.errors import DuplicateKeyError
 
 from app.security import hash_password
 
@@ -152,7 +151,4 @@ async def ensure_seed_users(db: AsyncIOMotorDatabase) -> None:
             "created_at": now,
             "updated_at": now,
         }
-        try:
-            await collection.insert_one(document)
-        except DuplicateKeyError:
-            continue
+        await collection.insert_one(document)
