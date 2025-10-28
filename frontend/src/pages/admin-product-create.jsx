@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { faker } from "@faker-js/faker";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, PackagePlus, CheckCircle2, AlertCircle } from "lucide-react";
 import TopBar from "../components/topbar";
@@ -115,6 +116,94 @@ export default function AdminProductCreatePage() {
   };
   const resetForm = () => {
     setForm({ ...initialFormState });
+  };
+
+  const fillWithFakeFood = () => {
+    const adjectives = [
+      "유기농",
+      "프리미엄",
+      "무설탕",
+      "저칼로리",
+      "비건",
+      "글루텐프리",
+      "수제",
+      "고단백",
+    ];
+    const foods = [
+      "그래놀라",
+      "견과류 믹스",
+      "콜드브루",
+      "수제 잼",
+      "올리브 오일",
+      "코코넛 워터",
+      "홍삼 스틱",
+      "프로틴 바",
+      "그릭 요거트",
+      "발사믹 드레싱",
+      "트러플 소금",
+      "허브 티",
+      "동결건조 과일",
+    ];
+
+    const title = `${faker.helpers.arrayElement(adjectives)} ${faker.helpers.arrayElement(foods)}`;
+    const subtitleOptions = [
+      "첨가물 없이 건강하게 즐기는 데일리 푸드",
+      "신선한 원재료로 만든 균형 잡힌 맛",
+      "간편하지만 영양은 가득한 스마트 푸드",
+      "오늘도 가볍게, 맛있게, 건강하게",
+    ];
+    const subtitle = faker.helpers.arrayElement(subtitleOptions);
+
+    const price = faker.number.int({ min: 5000, max: 59000 });
+    const discount = faker.number.int({ min: 0, max: 30 });
+    const sale_price = discount > 0 ? Math.max(1000, Math.floor(price * (1 - discount / 100))) : "";
+    const stock = faker.number.int({ min: 20, max: 400 });
+
+    const shipping = faker.helpers.arrayElement([
+      "free",
+      "flat_3000",
+      "same_day",
+    ]);
+
+    const keywords = [
+      "식품",
+      "건강식",
+      "스낵",
+      "비건",
+      "유기농",
+      "저당",
+    ];
+    const tags = ["신상", "베스트", "한정수량", "특가"]; // 일부만 사용
+
+    const gallery = [
+      "https://source.unsplash.com/960x720/?food",
+      "https://source.unsplash.com/960x720/?meal",
+      "https://source.unsplash.com/960x720/?snack",
+    ].join("\n");
+
+    const fake = {
+      title,
+      subtitle,
+      sku: "",
+      barcode: "",
+      price: String(price),
+      sale_price: sale_price ? String(sale_price) : "",
+      stock: String(stock),
+      category: "food",
+      shipping,
+      status: "published",
+      thumbnail_url: "https://source.unsplash.com/960x720/?gourmet",
+      gallery,
+      description:
+        "신선한 원재료만을 사용해 맛과 영양을 모두 담았습니다. 바쁜 일상에서도 건강하게 즐길 수 있는 간편 식품 라인업입니다.",
+      keywords: keywords.slice(0, faker.number.int({ min: 2, max: 5 })).join(", "),
+      tags: tags.slice(0, faker.number.int({ min: 1, max: 3 })).join(", "),
+      is_recommended: true,
+      recommendation_reason: "건강을 생각하는 분께 딱 맞는 선택",
+    };
+
+    setForm(fake);
+    setFeedback({ type: "success", message: "식품 샘플 데이터를 자동으로 채웠습니다." });
   };
 
   useEffect(() => {
@@ -627,6 +716,14 @@ export default function AdminProductCreatePage() {
                 >
                   {" "}
                   내용 초기화{" "}
+                </button>{" "}
+                <button
+                  type="button"
+                  onClick={fillWithFakeFood}
+                  disabled={submitting}
+                  className="rounded-full border border-emerald-300 px-4 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  식품 샘플 자동 입력
                 </button>{" "}
                 <button
                   type="submit"

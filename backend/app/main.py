@@ -15,7 +15,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],  # 정확한 도메인 지정
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -48,4 +48,3 @@ app.include_router(admin.router)
 async def health_check():
     """Simple health check endpoint."""
     return {"status": "ok"}
-

@@ -86,7 +86,7 @@ class ProductCreateRequest(BaseModel):
     description: constr(min_length=10)
     keywords: List[constr(strip_whitespace=True, max_length=40)] = Field(default_factory=list)
     tags: List[constr(strip_whitespace=True, max_length=30)] = Field(default_factory=list)
-    is_recommended: bool = False
+    is_recommended: bool = True
     recommendation_reason: Optional[constr(strip_whitespace=True, max_length=200)] = None
 
 
@@ -173,4 +173,3 @@ class AdminActionResponse(BaseModel):
     status: str
     message: str
     data: Optional[Dict[str, Any]] = None
-
