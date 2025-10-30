@@ -1,257 +1,272 @@
-import { useState } from "react";
-import { Check, Eye, EyeOff, Lock, Mail, MapPin, Phone, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { Checkbox } from "./ui/checkbox";
-import { Input } from "./ui/input";
-import { Separator } from "./ui/separator";
+import { useState } from 'react';
+import { Mail, Lock, User, Phone, MapPin, Eye, EyeOff, Check } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { Input } from './ui/input';
+import { Checkbox } from './ui/checkbox';
+import { Separator } from './ui/separator';
+import { toast } from 'sonner@2.0.3';
+import type { Page } from '../App';
 
-export function SignupPage() {
-  const navigate = useNavigate();
+interface SignupPageProps {
+  onNavigate: (page: Page) => void;
+}
+
+export function SignupPage({ onNavigate }: SignupPageProps) {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: '',
+    phone: '',
+    address: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreements, setAgreements] = useState({
-    terms: true,
-    privacy: true,
-    marketing: false,
-  });
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    name: "",
-    phone: "",
-    address: "",
-  });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [agreedToMarketing, setAgreedToMarketing] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
-  const toggleAgreement = (key: keyof typeof agreements) => {
-    setAgreements((prev) => ({ ...prev, [key]: !prev[key] }));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password || !formData.name || !formData.phone) {
+      toast.error('필수 정보를 모두 입력해주세요');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('비밀번호가 일치하지 않습니다');
+      return;
+    }
+
+    if (!agreedToTerms || !agreedToPrivacy) {
+      toast.error('필수 약관에 동의해주세요');
+      return;
+    }
+
+    if (!emailVerified) {
+      toast.error('이메일 인증을 완료해주세요');
+      return;
+    }
+
+    toast.success('회원가입이 완료되었습니다!');
+    onNavigate('login');
   };
 
-  const handleChange = (field: keyof typeof form, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!form.email || !form.password || !form.confirmPassword || !form.name) {
-      toast.error("필수 정보를 모두 입력해 주세요.");
+  const handleVerifyEmail = () => {
+    if (!formData.email) {
+      toast.error('이메일을 입력해주세요');
       return;
     }
-    if (form.password !== form.confirmPassword) {
-      toast.error("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-    if (!agreements.terms || !agreements.privacy) {
-      toast.error("필수 약관에 동의해 주세요.");
-      return;
-    }
-
-    toast.success("회원가입이 완료되었습니다.");
-    navigate("/login", { state: { email: form.email, justRegistered: true } });
+    toast.success('인증 이메일이 발송되었습니다');
+    // Mock verification
+    setTimeout(() => {
+      setEmailVerified(true);
+      toast.success('이메일 인증이 완료되었습니다');
+    }, 2000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col items-center justify-center px-6 py-12">
-        <Card className="w-full border-gray-200 bg-white/95 p-8 shadow">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold text-gray-900">회원가입</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Mall 해봐의 다양한 혜택을 받아보세요.
-            </p>
-          </div>
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center bg-gray-50 py-12">
+      <Card className="w-full max-w-2xl p-8 mx-6 md:mx-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl mb-2">회원가입</h1>
+          <p className="text-gray-600">AI Shop과 함께 스마트한 쇼핑을 시작하세요</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  이메일
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(event) => handleChange("email", event.target.value)}
-                    placeholder="you@example.com"
-                    className="h-11 pl-10"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  이름
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    value={form.name}
-                    onChange={(event) => handleChange("name", event.target.value)}
-                    placeholder="홍길동"
-                    className="h-11 pl-10"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  비밀번호
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={form.password}
-                    onChange={(event) => handleChange("password", event.target.value)}
-                    placeholder="8자 이상 입력해 주세요"
-                    className="h-11 pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  비밀번호 확인
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={form.confirmPassword}
-                    onChange={(event) =>
-                      handleChange("confirmPassword", event.target.value)
-                    }
-                    placeholder="비밀번호를 다시 입력해 주세요"
-                    className="h-11 pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  휴대폰 번호
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    value={form.phone}
-                    onChange={(event) => handleChange("phone", event.target.value)}
-                    placeholder="010-1234-5678"
-                    className="h-11 pl-10"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  주소
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    value={form.address}
-                    onChange={(event) => handleChange("address", event.target.value)}
-                    placeholder="서울특별시 강남구"
-                    className="h-11 pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2 rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="agree-all"
-                  checked={agreements.terms && agreements.privacy && agreements.marketing}
-                  onCheckedChange={(value) => {
-                    const checked = Boolean(value);
-                    setAgreements({
-                      terms: checked,
-                      privacy: checked,
-                      marketing: checked,
-                    });
-                  }}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email */}
+          <div>
+            <label className="block text-sm mb-2">
+              이메일 <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="pl-10"
+                  disabled={emailVerified}
                 />
-                <label htmlFor="agree-all" className="cursor-pointer font-medium text-gray-900">
-                  전체 동의
-                </label>
+                {emailVerified && (
+                  <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                )}
               </div>
-              <div className="ml-6 space-y-2">
-                <label className="flex cursor-pointer items-center gap-2">
-                  <Checkbox
-                    checked={agreements.terms}
-                    onCheckedChange={() => toggleAgreement("terms")}
-                  />
-                  <span>[필수] 이용약관 동의</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <Checkbox
-                    checked={agreements.privacy}
-                    onCheckedChange={() => toggleAgreement("privacy")}
-                  />
-                  <span>[필수] 개인정보 수집 및 이용 동의</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <Checkbox
-                    checked={agreements.marketing}
-                    onCheckedChange={() => toggleAgreement("marketing")}
-                  />
-                  <span>[선택] 마케팅 정보 수신 동의</span>
-                </label>
+              <Button
+                onClick={handleVerifyEmail}
+                disabled={emailVerified}
+                className="bg-gray-900 hover:bg-black text-white shrink-0"
+              >
+                {emailVerified ? '인증완료' : '인증하기'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm mb-2">
+                비밀번호 <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="8자 이상 입력"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="pl-10 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
-
-            <Button
-              type="submit"
-              className="h-11 w-full bg-gray-900 text-white hover:bg-black"
-            >
-              가입 완료
-            </Button>
-          </form>
-
-          <Separator className="my-6" />
-
-          <div className="text-center text-sm text-gray-600">
-            이미 계정이 있으신가요?{" "}
-            <button
-              type="button"
-              className="font-medium text-gray-900 underline"
-              onClick={() => navigate("/login")}
-            >
-              로그인
-            </button>
+            <div>
+              <label className="block text-sm mb-2">
+                비밀번호 확인 <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="비밀번호 재입력"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="pl-10 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
           </div>
-        </Card>
-      </div>
+
+          {/* Name & Phone */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm mb-2">
+                이름 <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="홍길동"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm mb-2">
+                휴대폰 번호 <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="tel"
+                  placeholder="010-1234-5678"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-sm mb-2">배송지 주소 (선택)</label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="서울시 강남구 테헤란로 123"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Terms */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="terms"
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              />
+              <label htmlFor="terms" className="text-sm cursor-pointer">
+                <span className="text-red-500">*</span> 이용약관에 동의합니다
+              </label>
+              <Button variant="link" className="text-sm p-0 h-auto ml-auto">
+                보기
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="privacy"
+                checked={agreedToPrivacy}
+                onCheckedChange={(checked) => setAgreedToPrivacy(checked as boolean)}
+              />
+              <label htmlFor="privacy" className="text-sm cursor-pointer">
+                <span className="text-red-500">*</span> 개인정보 처리방침에 동의합니다
+              </label>
+              <Button variant="link" className="text-sm p-0 h-auto ml-auto">
+                보기
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="marketing"
+                checked={agreedToMarketing}
+                onCheckedChange={(checked) => setAgreedToMarketing(checked as boolean)}
+              />
+              <label htmlFor="marketing" className="text-sm cursor-pointer">
+                마케팅 정보 수신에 동의합니다 (선택)
+              </label>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full bg-gray-900 hover:bg-black text-white"
+          >
+            회원가입
+          </Button>
+        </form>
+
+        <Separator className="my-6" />
+
+        <div className="text-center text-sm text-gray-600">
+          이미 계정이 있으신가요?{' '}
+          <Button
+            variant="link"
+            className="p-0 h-auto text-gray-900"
+            onClick={() => onNavigate('login')}
+          >
+            로그인
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }
