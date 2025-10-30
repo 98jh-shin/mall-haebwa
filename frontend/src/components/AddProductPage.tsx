@@ -1,45 +1,51 @@
-import { useState } from 'react';
-import { ArrowLeft, Upload, X, Plus } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { toast } from 'sonner@2.0.3';
-import type { Page } from '../App';
+import { useState } from "react";
+import { ArrowLeft, Upload, X, Plus } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { toast } from "sonner";
+import type { Page } from "../App";
 
 interface AddProductPageProps {
   onNavigate: (page: Page) => void;
 }
 
 export function AddProductPage({ onNavigate }: AddProductPageProps) {
-  const [productName, setProductName] = useState('');
-  const [price, setPrice] = useState('');
-  const [originalPrice, setOriginalPrice] = useState('');
-  const [category, setCategory] = useState('');
-  const [brand, setBrand] = useState('');
-  const [stock, setStock] = useState('');
-  const [description, setDescription] = useState('');
-  const [colors, setColors] = useState('');
-  const [sizes, setSizes] = useState('');
+  const [productName, setProductName] = useState("");
+  const [price, setPrice] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [brand, setBrand] = useState("");
+  const [stock, setStock] = useState("");
+  const [description, setDescription] = useState("");
+  const [colors, setColors] = useState("");
+  const [sizes, setSizes] = useState("");
   const [images, setImages] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!productName || !price || !category || !stock) {
-      toast.error('필수 항목을 모두 입력해주세요');
+      toast.error("필수 항목을 모두 입력해주세요");
       return;
     }
 
-    toast.success('상��이 등록되었습니다');
-    onNavigate('admin');
+    toast.success("상��이 등록되었습니다");
+    onNavigate("admin");
   };
 
   const handleAddImage = () => {
     // Mock image upload
-    toast.info('실제 환경에서는 이미지 업로드가 실행됩니다');
+    toast.info("실제 환경에서는 이미지 업로드가 실행됩니다");
   };
 
   const handleRemoveImage = (index: number) => {
@@ -53,14 +59,15 @@ export function AddProductPage({ onNavigate }: AddProductPageProps) {
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => onNavigate('admin')}
-            className="mb-4 -ml-2 hover:bg-gray-100"
-          >
+            onClick={() => onNavigate("admin")}
+            className="mb-4 -ml-2 hover:bg-gray-100">
             <ArrowLeft className="w-4 h-4 mr-2" />
             셀러 센터로 돌아가기
           </Button>
           <h1 className="text-2xl mb-1">상품 등록</h1>
-          <p className="text-sm text-gray-600">새로운 상품을 등록하고 판매를 시작하세요</p>
+          <p className="text-sm text-gray-600">
+            새로운 상품을 등록하고 판매를 시작하세요
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -179,22 +186,30 @@ export function AddProductPage({ onNavigate }: AddProductPageProps) {
             <h2 className="text-lg mb-4">상품 이미지</h2>
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                최대 10장까지 등록 가능합니다. 첫 번째 이미지가 대표 이미지로 사용됩니다.
+                최대 10장까지 등록 가능합니다. 첫 번째 이미지가 대표 이미지로
+                사용됩니다.
               </p>
               <div className="grid grid-cols-5 gap-4">
                 {images.map((image, index) => (
-                  <div key={index} className="relative aspect-square bg-gray-100 rounded border border-gray-200">
-                    <img src={image} alt={`상품 이미지 ${index + 1}`} className="w-full h-full object-cover rounded" />
+                  <div
+                    key={index}
+                    className="relative aspect-square bg-gray-100 rounded border border-gray-200">
+                    <img
+                      src={image}
+                      alt={`상품 이미지 ${index + 1}`}
+                      className="w-full h-full object-cover rounded"
+                    />
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(index)}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-black"
-                    >
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-black">
                       <X className="w-4 h-4" />
                     </button>
                     {index === 0 && (
                       <div className="absolute bottom-2 left-2">
-                        <span className="bg-gray-900 text-white text-xs px-2 py-0.5 rounded">대표</span>
+                        <span className="bg-gray-900 text-white text-xs px-2 py-0.5 rounded">
+                          대표
+                        </span>
                       </div>
                     )}
                   </div>
@@ -203,8 +218,7 @@ export function AddProductPage({ onNavigate }: AddProductPageProps) {
                   <button
                     type="button"
                     onClick={handleAddImage}
-                    className="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded hover:border-gray-400 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center gap-2"
-                  >
+                    className="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded hover:border-gray-400 hover:bg-gray-100 transition-colors flex flex-col items-center justify-center gap-2">
                     <Upload className="w-6 h-6 text-gray-400" />
                     <span className="text-xs text-gray-500">이미지 추가</span>
                   </button>
@@ -270,15 +284,13 @@ export function AddProductPage({ onNavigate }: AddProductPageProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => onNavigate('admin')}
-              className="flex-1 h-12"
-            >
+              onClick={() => onNavigate("admin")}
+              className="flex-1 h-12">
               취소
             </Button>
             <Button
               type="submit"
-              className="flex-1 h-12 bg-gray-900 hover:bg-black text-white"
-            >
+              className="flex-1 h-12 bg-gray-900 hover:bg-black text-white">
               상품 등록하기
             </Button>
           </div>

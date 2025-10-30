@@ -1,9 +1,17 @@
-import { User, Package, Heart, Star, Settings, LogOut, ChevronRight } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { Separator } from './ui/separator';
-import type { Page, User as UserType } from '../App';
+import {
+  User,
+  Package,
+  Heart,
+  Star,
+  Settings,
+  LogOut,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Separator } from "./ui/separator";
+import type { Page, User as UserType } from "../App";
 
 interface MyPageProps {
   currentUser: UserType | null;
@@ -18,9 +26,8 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
         <User className="w-20 h-20 text-gray-300 mx-auto mb-6" />
         <h2 className="text-xl mb-4">로그인이 필요합니다</h2>
         <Button
-          onClick={() => onNavigate('login')}
-          className="bg-gray-900 hover:bg-black text-white"
-        >
+          onClick={() => onNavigate("login")}
+          className="bg-gray-900 hover:bg-black text-white">
           로그인하기
         </Button>
       </div>
@@ -30,28 +37,28 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
   const menuItems = [
     {
       icon: Package,
-      title: '주문/배송 조회',
-      description: '주문 내역 및 배송 상태 확인',
-      action: () => onNavigate('orders')
+      title: "주문/배송 조회",
+      description: "주문 내역 및 배송 상태 확인",
+      action: () => onNavigate("orders"),
     },
     {
       icon: Heart,
-      title: '찜한 상품',
-      description: '관심 상품 모아보기',
-      action: () => {}
+      title: "찜한 상품",
+      description: "관심 상품 모아보기",
+      action: () => {},
     },
     {
       icon: Star,
-      title: '내가 쓴 리뷰',
-      description: '작성한 리뷰 관리',
-      action: () => {}
+      title: "내가 쓴 리뷰",
+      description: "작성한 리뷰 관리",
+      action: () => {},
     },
     {
       icon: Settings,
-      title: '회원정보 수정',
-      description: '개인정보 및 설정 변경',
-      action: () => {}
-    }
+      title: "회원정보 수정",
+      description: "개인정보 및 설정 변경",
+      action: () => {},
+    },
   ];
 
   return (
@@ -78,29 +85,18 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start h-9"
-                  onClick={() => onNavigate('orders')}
-                >
+                  onClick={() => onNavigate("orders")}>
                   <Package className="w-4 h-4 mr-2" />
                   주문내역
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
+                <Button variant="ghost" className="w-full justify-start h-9">
                   <Heart className="w-4 h-4 mr-2" />
                   찜한 상품
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  내 리뷰
+                <Button variant="ghost" className="w-full justify-start h-9">
+                  <Star className="w-4 h-4 mr-2" />내 리뷰
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
+                <Button variant="ghost" className="w-full justify-start h-9">
                   <Settings className="w-4 h-4 mr-2" />
                   설정
                 </Button>
@@ -108,8 +104,7 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={onLogout}
-                >
+                  onClick={onLogout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   로그아웃
                 </Button>
@@ -145,8 +140,7 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
                 <div
                   key={index}
                   className="bg-white border border-gray-200 p-5 cursor-pointer hover:border-gray-900 transition-colors"
-                  onClick={item.action}
-                >
+                  onClick={item.action}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gray-900/10 rounded-full flex items-center justify-center">
@@ -154,7 +148,9 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
                       </div>
                       <div>
                         <h3 className="text-sm mb-0.5">{item.title}</h3>
-                        <p className="text-xs text-gray-500">{item.description}</p>
+                        <p className="text-xs text-gray-500">
+                          {item.description}
+                        </p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -198,20 +194,28 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
             <div className="bg-white border border-gray-200 p-6 mt-6">
               <h3 className="mb-4">계정 관리</h3>
               <div className="space-y-2 text-sm">
-                <Button variant="outline" className="w-full justify-between h-9">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-9">
                   알림 설정
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" className="w-full justify-between h-9">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-9">
                   결제 수단 관리
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" className="w-full justify-between h-9">
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-9">
                   배송지 관리
                   <ChevronRight className="w-4 h-4" />
                 </Button>
                 <Separator className="my-2" />
-                <Button variant="ghost" className="w-full justify-between text-gray-600 h-9">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between text-gray-600 h-9">
                   회원 탈퇴
                   <ChevronRight className="w-4 h-4" />
                 </Button>
