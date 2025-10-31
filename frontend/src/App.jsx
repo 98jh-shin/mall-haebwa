@@ -7,22 +7,21 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    // Backend API 연결 테스트
-    const checkAPI = async () => {
-      try {
-        const response = await axios.get('/api')
-        setApiStatus(response.data)
-        setError(null)
-      } catch (err) {
-        setError('API 연결 실패: ' + err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
+    useEffect(() => {
+        const checkAPI = async () => {
+            try {
+                const response = await axios.get('/')  // '/api' → '/' 변경!
+                setApiStatus(response.data)
+                setError(null)
+            } catch (err) {
+                setError('API 연결 실패: ' + err.message)
+            } finally {
+                setLoading(false)
+            }
+        }
 
-    checkAPI()
-  }, [])
+        checkAPI()
+    }, [])
 
   const checkHealth = async () => {
     try {
