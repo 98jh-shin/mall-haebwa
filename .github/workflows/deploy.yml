@@ -25,8 +25,8 @@ jobs:
         
         # EC2에 접속해서 배포
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
-          # 프로젝트 디렉토리로 이동
-          cd ~/ecommerce-ai-platform
+          # 프로젝트 디렉토리로 이동 (수정!)
+          cd ~/mall-haebwa
           
           # 최신 코드 가져오기
           echo "📥 Pulling latest code..."
@@ -36,7 +36,7 @@ jobs:
           echo "🛑 Stopping containers..."
           docker compose down
           
-          # Docker 이미지 재빌드 (매우 중요!)
+          # Docker 이미지 재빌드
           echo "🔨 Rebuilding images..."
           docker compose build --no-cache
           
