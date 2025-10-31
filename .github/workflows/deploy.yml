@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main  # main 브랜치에 push할 때 실행
+      - main
 
 jobs:
   deploy:
@@ -24,20 +24,32 @@ jobs:
         chmod 600 private_key.pem
         
         # EC2에 접속해서 배포
-        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} '
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
+          # 프로젝트 디렉토리로 이동
           cd ~/ecommerce-ai-platform
           
           # 최신 코드 가져오기
+          echo "📥 Pulling latest code..."
           git pull origin main
           
-          # Docker 이미지 재빌드 및 재시작
+          # Docker 컨테이너 중지
+          echo "🛑 Stopping containers..."
           docker compose down
-          docker compose up -d --build
           
-          # 완료 메시지
+          # Docker 이미지 재빌드 (매우 중요!)
+          echo "🔨 Rebuilding images..."
+          docker compose build --no-cache
+          
+          # Docker 컨테이너 시작
+          echo "🚀 Starting containers..."
+          docker compose up -d
+          
+          # 로그 확인
+          echo "📋 Container status:"
+          docker compose ps
+          
           echo "✅ Deployment completed!"
-        '
+        ENDSSH
         
         # 키 파일 삭제
         rm -f private_key.pem
-
