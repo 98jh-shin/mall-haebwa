@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Star, Filter, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import {
   Select,
@@ -21,135 +20,21 @@ interface ProductListPageProps {
   searchQuery: string;
 }
 
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "여름 시원한 린넨 반팔 셔츠",
-    price: 29900,
-    originalPrice: 45000,
-    image: "fashion shirt",
-    category: "fashion",
-    brand: "베이직코튼",
-    rating: 4.8,
-    reviewCount: 1234,
-    description: "시원한 린넨 소재로 만든 여름 필수 아이템",
-    images: [],
-    colors: ["화이트", "블랙", "네이비"],
-    sizes: ["S", "M", "L", "XL"],
-    stock: 150,
-  },
-  {
-    id: "2",
-    name: "편안한 운동화 데일리 스니커즈",
-    price: 49900,
-    originalPrice: 79000,
-    image: "casual sneakers",
-    category: "fashion",
-    brand: "워크앤런",
-    rating: 4.9,
-    reviewCount: 2341,
-    description: "출근부터 운동까지 하루종일 편안한 스니커즈",
-    images: [],
-    colors: ["화이트", "블랙"],
-    sizes: ["230", "240", "250", "260", "270"],
-    stock: 200,
-  },
-  {
-    id: "3",
-    name: "무선 블루투스 이어폰 프리미엄",
-    price: 89000,
-    image: "wireless earbuds",
-    category: "digital",
-    brand: "사운드프로",
-    rating: 4.7,
-    reviewCount: 892,
-    description: "노이즈 캔슬링 기능의 프리미엄 이어폰",
-    images: [],
-    colors: ["블랙", "화이트"],
-    stock: 80,
-  },
-  {
-    id: "4",
-    name: "천연 보습 크림 대용량",
-    price: 24900,
-    originalPrice: 35000,
-    image: "skincare cream",
-    category: "beauty",
-    brand: "네이처스킨",
-    rating: 4.6,
-    reviewCount: 567,
-    description: "민감성 피부도 안심하고 사용하는 천연 보습 크림",
-    images: [],
-    stock: 300,
-  },
-  {
-    id: "5",
-    name: "가볍고 튼튼한 캐리어 20인치",
-    price: 89000,
-    originalPrice: 150000,
-    image: "luggage suitcase",
-    category: "life",
-    brand: "트래블메이트",
-    rating: 4.8,
-    reviewCount: 445,
-    description: "여행의 필수품, 가볍고 내구성 좋은 캐리어",
-    images: [],
-    colors: ["실버", "블랙", "로즈골드"],
-    stock: 120,
-  },
-  {
-    id: "6",
-    name: "프리미엄 요가매트 두께 10mm",
-    price: 39900,
-    image: "yoga mat",
-    category: "sports",
-    brand: "홈핏",
-    rating: 4.7,
-    reviewCount: 678,
-    description: "집에서 편하게 운동할 수 있는 두툼한 요가매트",
-    images: [],
-    colors: ["퍼플", "핑크", "그레이"],
-    stock: 250,
-  },
-  {
-    id: "7",
-    name: "유기농 아기 물티슈 10팩",
-    price: 19900,
-    image: "baby wipes",
-    category: "baby",
-    brand: "베이비케어",
-    rating: 4.9,
-    reviewCount: 1567,
-    description: "민감한 아기 피부를 위한 유기농 물티슈",
-    images: [],
-    stock: 500,
-  },
-  {
-    id: "8",
-    name: "베스트셀러 자기계발서 세트",
-    price: 45000,
-    originalPrice: 60000,
-    image: "books collection",
-    category: "book",
-    brand: "북스토리",
-    rating: 4.8,
-    reviewCount: 234,
-    description: "인생을 바꾸는 필독 자기계발서 3권 세트",
-    images: [],
-    stock: 180,
-  },
-];
-
-const brands = [
-  "베이직코튼",
-  "워크앤런",
-  "사운드프로",
-  "네이처스킨",
-  "트래블메이트",
-  "홈핏",
-  "베이비케어",
-  "북스토리",
-];
+// 서버 응답 스키마 (백엔드 /admin/public/products)
+interface ServerProduct {
+  id: string;
+  title: string;
+  link?: string;
+  image?: string;
+  lprice?: string;
+  mallName?: string;
+  maker?: string;
+  brand?: string;
+  category1?: string;
+  category2?: string;
+  category3?: string;
+  category4?: string;
+}
 
 export function ProductListPage({
   onNavigate,
@@ -159,12 +44,48 @@ export function ProductListPage({
   const [sortBy, setSortBy] = useState("popular");
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState([0, 200000]);
-  const [filteredProducts, setFilteredProducts] =
-    useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
+  // 서버에서 상품 목록 로드
   useEffect(() => {
-    let filtered = mockProducts;
+    fetch("http://localhost:8000/admin/public/products", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data: ServerProduct[]) => {
+        const mapped: Product[] = data.map((p) => ({
+          id: p.id,
+          name: p.title,
+          price: Number(p.lprice || 0),
+          originalPrice: undefined,
+          image: p.image || "/placeholder.png",
+          category: p.category1 || "",
+          brand: p.brand || p.category1 || "",
+          rating: 0,
+          reviewCount: 0,
+          description: "",
+          images: [],
+          stock: 999,
+        }));
+        setProducts(mapped);
+        setFilteredProducts(mapped);
+        const brands = Array.from(
+          new Set(mapped.map((m) => m.brand).filter(Boolean))
+        ) as string[];
+        setAvailableBrands(brands);
+      })
+      .catch(() => {
+        setProducts([]);
+        setFilteredProducts([]);
+        setAvailableBrands([]);
+      });
+  }, []);
+
+  useEffect(() => {
+    let filtered = products;
 
     // Category filter
     if (selectedCategory !== "all") {
@@ -196,24 +117,23 @@ export function ProductListPage({
     // Sort
     switch (sortBy) {
       case "popular":
-        filtered.sort((a, b) => b.reviewCount - a.reviewCount);
+        filtered = [...filtered].sort((a, b) => b.reviewCount - a.reviewCount);
         break;
       case "latest":
-        // In real app, would sort by date
         break;
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price);
+        filtered = [...filtered].sort((a, b) => a.price - b.price);
         break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered = [...filtered].sort((a, b) => b.price - a.price);
         break;
       case "rating":
-        filtered.sort((a, b) => b.rating - a.rating);
+        filtered = [...filtered].sort((a, b) => b.rating - a.rating);
         break;
     }
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, searchQuery, selectedBrands, priceRange, sortBy]);
+  }, [products, selectedCategory, searchQuery, selectedBrands, priceRange, sortBy]);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands((prev) =>
@@ -272,7 +192,7 @@ export function ProductListPage({
             <div className="mb-6">
               <h4 className="text-sm mb-3">브랜드</h4>
               <div className="space-y-2">
-                {brands.map((brand) => (
+                {availableBrands.map((brand) => (
                   <div key={brand} className="flex items-center gap-2">
                     <Checkbox
                       id={brand}
@@ -360,7 +280,7 @@ export function ProductListPage({
                   onClick={() => onNavigate("product-detail", product.id)}>
                   <div className="relative aspect-square bg-gray-50 mb-2 overflow-hidden border border-gray-200 rounded">
                     <ImageWithFallback
-                      src={`https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80`}
+                      src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -408,3 +328,4 @@ export function ProductListPage({
     </div>
   );
 }
+

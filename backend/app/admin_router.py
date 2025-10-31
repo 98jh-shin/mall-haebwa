@@ -93,11 +93,9 @@ async def get_public_product_detail(
         obj_id = ObjectId(product_id)
     except Exception:
         raise HTTPException(status_code=400, detail="유효하지 않은 상품 ID 입니다.")
-
     product = await db["products"].find_one({"_id": obj_id})
     if not product:
         raise HTTPException(status_code=404, detail="상품을 찾을 수 없습니다.")
-
     return {
         "id": str(product["_id"]),
         "title": product.get("title", ""),
