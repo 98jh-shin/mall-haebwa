@@ -37,9 +37,10 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
   const [agreedToMarketing, setAgreedToMarketing] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 유효성 검사 (기존 로직 그대로)
     if (
       !formData.email ||
       !formData.password ||
@@ -65,8 +66,29 @@ export function SignupPage({ onNavigate }: SignupPageProps) {
       return;
     }
 
-    toast.success("회원가입이 완료되었습니다!");
-    onNavigate("login");
+    try {
+      const res = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail ?? "회원가입 실패");
+      }
+
+      toast.success("회원가입이 완료되었습니다!");
+      onNavigate("login");
+    } catch (err: any) {
+      toast.error(err.message || "회원가입 중 오류가 발생했습니다.");
+    }
   };
 
   const handleVerifyEmail = () => {

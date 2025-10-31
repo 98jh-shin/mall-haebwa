@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Package,
   ShoppingCart,
@@ -151,6 +151,17 @@ const mockCoupons = [
 
 export function AdminPage({ onNavigate }: AdminPageProps) {
   const [selectedTab, setSelectedTab] = useState("dashboard");
+
+  useEffect(() => {
+    fetch("http://localhost:8000/admin/check", {
+      credentials: "include",
+    }).then((res) => {
+      if (res.status === 403) {
+        toast.error("관리자 권한이 없습니다!");
+        onNavigate("home");
+      }
+    });
+  }, []);
 
   // Dashboard stats
   const stats = {

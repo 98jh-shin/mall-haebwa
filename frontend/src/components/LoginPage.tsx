@@ -5,7 +5,7 @@ import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
 import { Checkbox } from "./ui/checkbox";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import type { Page, User } from "../App";
 
 interface LoginPageProps {
@@ -19,7 +19,7 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -27,17 +27,35 @@ export function LoginPage({ onLogin, onNavigate }: LoginPageProps) {
       return;
     }
 
-    // Mock login
-    const mockUser: User = {
-      id: "1",
-      email: email,
-      name: "홍길동",
-      phone: "010-1234-5678",
-      address: "서울시 강남구 테헤란로 123",
-    };
+    try {
+      const res = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ 쿠키 포함 (필수!)
+        body: JSON.stringify({ email, password, remember: rememberMe }),
+      });
 
-    onLogin(mockUser);
-    toast.success("로그인 되었습니다!");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail ?? "로그인 실패");
+      }
+
+      const user = await res.json();
+
+      // 백엔드가 _id로 보낼 수도 있으므로 안전하게 처리
+      onLogin({
+        id: user.id ?? user._id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        address: user.address,
+        role: user.role ?? "user",
+      });
+
+      toast.success("로그인 성공!");
+    } catch (err: any) {
+      toast.error(err.message || "로그인 중 오류가 발생했습니다.");
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
