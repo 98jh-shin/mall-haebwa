@@ -25,26 +25,18 @@ jobs:
         
         # EC2에 접속해서 배포
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
-          # 프로젝트 디렉토리로 이동 (수정!)
+          # 프로젝트 디렉토리로 이동
           cd ~/mall-haebwa
           
           # 최신 코드 가져오기
           echo "📥 Pulling latest code..."
           git pull origin main
           
-          # Docker 컨테이너 중지
-          echo "🛑 Stopping containers..."
-          docker compose down
+          # Docker 컨테이너 재시작 (빌드 없이!)
+          echo "🔄 Restarting containers..."
+          docker compose restart
           
-          # Docker 이미지 재빌드
-          echo "🔨 Rebuilding images..."
-          docker compose build --no-cache
-          
-          # Docker 컨테이너 시작
-          echo "🚀 Starting containers..."
-          docker compose up -d
-          
-          # 로그 확인
+          # 상태 확인
           echo "📋 Container status:"
           docker compose ps
           
