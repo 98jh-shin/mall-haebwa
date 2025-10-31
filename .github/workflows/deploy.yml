@@ -1,0 +1,43 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push할 때 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        # SSH 키 설정
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        
+        # EC2에 접속해서 배포
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} '
+          cd ~/ecommerce-ai-platform
+          
+          # 최신 코드 가져오기
+          git pull origin main
+          
+          # Docker 이미지 재빌드 및 재시작
+          docker compose down
+          docker compose up -d --build
+          
+          # 완료 메시지
+          echo "✅ Deployment completed!"
+        '
+        
+        # 키 파일 삭제
+        rm -f private_key.pem
+
