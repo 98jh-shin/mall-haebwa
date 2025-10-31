@@ -48,9 +48,10 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "message": "E-Commerce AI Platform API",
+        "message": "자동 배포 테스트 완료! ✅ MongoDB 준비 완료!",
         "status": "running",
-        "version": "0.1.0"
+        "version": "0.2.1",  # 버전 올림
+        "timestamp": "2025-10-31"
     }
 
 
