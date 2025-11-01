@@ -1,371 +1,400 @@
-import { useState, useEffect } from 'react';
-import { Star, Filter, Sparkles } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Checkbox } from './ui/checkbox';
-import { Slider } from './ui/slider';
-import type { Page, Product } from '../App';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-
-interface ProductListPageProps {
-  onNavigate: (page: Page, productId?: string) => void;
-  selectedCategory: string;
-  searchQuery: string;
-}
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Filter, Sparkles, Star } from "lucide-react";
+import { useAppState } from "../context/app-state";
+import type { Product } from "../types";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Checkbox } from "./ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Slider } from "./ui/slider";
+import { cn } from "./ui/utils";
 
 const mockProducts: Product[] = [
   {
-    id: '1',
-    name: '여름 시원한 린넨 반팔 셔츠',
+    id: "1",
+    name: "여름 린넨 반팔 셔츠",
     price: 29900,
     originalPrice: 45000,
-    image: 'fashion shirt',
-    category: 'fashion',
-    brand: '베이직코튼',
+    image: "fashion shirt",
+    category: "패션의류",
+    brand: "베이직코드",
     rating: 4.8,
     reviewCount: 1234,
-    description: '시원한 린넨 소재로 만든 여름 필수 아이템',
+    description: "시원한 린넨 소재의 여름 셔츠",
     images: [],
-    colors: ['화이트', '블랙', '네이비'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    stock: 150
+    colors: ["화이트", "블랙", "라이트블루"],
+    sizes: ["S", "M", "L", "XL"],
+    stock: 150,
   },
   {
-    id: '2',
-    name: '편안한 운동화 데일리 스니커즈',
+    id: "2",
+    name: "데일리 클래식 스니커즈",
     price: 49900,
     originalPrice: 79000,
-    image: 'casual sneakers',
-    category: 'fashion',
-    brand: '워크앤런',
+    image: "casual sneakers",
+    category: "패션의류",
+    brand: "뉴바운스",
     rating: 4.9,
     reviewCount: 2341,
-    description: '출근부터 운동까지 하루종일 편안한 스니커즈',
+    description: "하루 종일 편안한 데일리 스니커즈",
     images: [],
-    colors: ['화이트', '블랙'],
-    sizes: ['230', '240', '250', '260', '270'],
-    stock: 200
+    colors: ["화이트", "블랙"],
+    sizes: ["230", "240", "250", "260", "270"],
+    stock: 200,
   },
   {
-    id: '3',
-    name: '무선 블루투스 이어폰 프리미엄',
+    id: "3",
+    name: "프리미엄 블루투스 이어폰",
     price: 89000,
-    image: 'wireless earbuds',
-    category: 'digital',
-    brand: '사운드프로',
+    image: "wireless earbuds",
+    category: "가전디지털",
+    brand: "사운드랩",
     rating: 4.7,
     reviewCount: 892,
-    description: '노이즈 캔슬링 기능의 프리미엄 이어폰',
+    description: "노이즈 캔슬링을 지원하는 프리미엄 이어폰",
     images: [],
-    colors: ['블랙', '화이트'],
-    stock: 80
+    colors: ["블랙", "화이트"],
+    stock: 80,
   },
   {
-    id: '4',
-    name: '천연 보습 크림 대용량',
+    id: "4",
+    name: "민감성 보습 크림 대용량",
     price: 24900,
     originalPrice: 35000,
-    image: 'skincare cream',
-    category: 'beauty',
-    brand: '네이처스킨',
+    image: "skincare cream",
+    category: "뷰티",
+    brand: "내추럴스",
     rating: 4.6,
     reviewCount: 567,
-    description: '민감성 피부도 안심하고 사용하는 천연 보습 크림',
+    description: "민감성 피부를 위한 저자극 보습 크림",
     images: [],
-    stock: 300
+    stock: 300,
   },
   {
-    id: '5',
-    name: '가볍고 튼튼한 캐리어 20인치',
+    id: "5",
+    name: "트래블 하드 캐리어 20인치",
     price: 89000,
     originalPrice: 150000,
-    image: 'luggage suitcase',
-    category: 'life',
-    brand: '트래블메이트',
+    image: "luggage suitcase",
+    category: "생활/주방",
+    brand: "트래블메이트",
     rating: 4.8,
     reviewCount: 445,
-    description: '여행의 필수품, 가볍고 내구성 좋은 캐리어',
+    description: "여행에 꼭 필요한 가볍고 튼튼한 캐리어",
     images: [],
-    colors: ['실버', '블랙', '로즈골드'],
-    stock: 120
+    colors: ["실버", "블랙", "로즈골드"],
+    stock: 120,
   },
   {
-    id: '6',
-    name: '프리미엄 요가매트 두께 10mm',
+    id: "6",
+    name: "프리미엄 요가 매트 10mm",
     price: 39900,
-    image: 'yoga mat',
-    category: 'sports',
-    brand: '홈핏',
+    image: "yoga mat",
+    category: "스포츠/레저",
+    brand: "핏플랜",
     rating: 4.7,
     reviewCount: 678,
-    description: '집에서 편하게 운동할 수 있는 두툼한 요가매트',
+    description: "집에서도 편안하게 운동할 수 있는 두꺼운 요가 매트",
     images: [],
-    colors: ['퍼플', '핑크', '그레이'],
-    stock: 250
-  },
-  {
-    id: '7',
-    name: '유기농 아기 물티슈 10팩',
-    price: 19900,
-    image: 'baby wipes',
-    category: 'baby',
-    brand: '베이비케어',
-    rating: 4.9,
-    reviewCount: 1567,
-    description: '민감한 아기 피부를 위한 유기농 물티슈',
-    images: [],
-    stock: 500
-  },
-  {
-    id: '8',
-    name: '베스트셀러 자기계발서 세트',
-    price: 45000,
-    originalPrice: 60000,
-    image: 'books collection',
-    category: 'book',
-    brand: '북스토리',
-    rating: 4.8,
-    reviewCount: 234,
-    description: '인생을 바꾸는 필독 자기계발서 3권 세트',
-    images: [],
-    stock: 180
+    colors: ["퍼플", "핑크", "그레이"],
+    stock: 250,
   },
 ];
 
-const brands = ['베이직코튼', '워크앤런', '사운드프로', '네이처스킨', '트래블메이트', '홈핏', '베이비케어', '북스토리'];
+const brands = Array.from(new Set(mockProducts.map((product) => product.brand)));
 
-export function ProductListPage({ onNavigate, selectedCategory, searchQuery }: ProductListPageProps) {
-  const [sortBy, setSortBy] = useState('popular');
+export function ProductListPage() {
+  const navigate = useNavigate();
+  const {
+    selectedCategory,
+    setSelectedCategory,
+    searchQuery,
+    setSearchQuery,
+  } = useAppState();
+
+  const [sortBy, setSortBy] = useState("popular");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([0, 200000]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    let filtered = mockProducts;
+  const filteredProducts = useMemo(() => {
+    return mockProducts.filter((product) => {
+      if (selectedCategory !== "all" && selectedCategory && product.category !== selectedCategory) {
+        return false;
+      }
 
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
+      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
+        return false;
+      }
 
-    // Search query filter (AI search simulation)
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.brand.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
-      );
-    }
+      if (
+        product.price < priceRange[0] ||
+        product.price > priceRange[1]
+      ) {
+        return false;
+      }
 
-    // Brand filter
-    if (selectedBrands.length > 0) {
-      filtered = filtered.filter(p => selectedBrands.includes(p.brand));
-    }
+      if (searchQuery.trim()) {
+        const normalised = searchQuery.trim().toLowerCase();
+        const target = `${product.name} ${product.description ?? ""} ${product.brand}`.toLowerCase();
+        return target.includes(normalised);
+      }
 
-    // Price filter
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+      return true;
+    });
+  }, [priceRange, searchQuery, selectedBrands, selectedCategory]);
 
-    // Sort
+  const sortedProducts = useMemo(() => {
+    const next = [...filteredProducts];
     switch (sortBy) {
-      case 'popular':
-        filtered.sort((a, b) => b.reviewCount - a.reviewCount);
-        break;
-      case 'latest':
-        // In real app, would sort by date
-        break;
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
+      case "latest":
+        return next.reverse();
+      case "price-low":
+        return next.sort((a, b) => a.price - b.price);
+      case "price-high":
+        return next.sort((a, b) => b.price - a.price);
+      case "rating":
+        return next.sort((a, b) => b.rating - a.rating);
+      default:
+        return next.sort((a, b) => b.reviewCount - a.reviewCount);
     }
-
-    setFilteredProducts(filtered);
-  }, [selectedCategory, searchQuery, selectedBrands, priceRange, sortBy]);
+  }, [filteredProducts, sortBy]);
 
   const toggleBrand = (brand: string) => {
-    setSelectedBrands(prev => 
-      prev.includes(brand) 
-        ? prev.filter(b => b !== brand)
-        : [...prev, brand]
+    setSelectedBrands((prev) =>
+      prev.includes(brand)
+        ? prev.filter((item) => item !== brand)
+        : [...prev, brand],
     );
   };
 
+  const handleResetFilters = () => {
+    setSelectedCategory("all");
+    setSearchQuery("");
+    setSelectedBrands([]);
+    setPriceRange([0, 200000]);
+  };
+
+  const handleProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
   return (
-    <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-6">
-      {/* AI Search Result Banner */}
-      {searchQuery && (
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <Sparkles className="w-5 h-5 text-purple-500 mt-0.5 shrink-0" />
-            <div>
-              <h3 className="text-sm mb-1">AI가 분석한 검색 결과</h3>
-              <p className="text-sm text-gray-600">
-                "<span className="text-purple-600">{searchQuery}</span>" 검색어로 
-                <span className="text-gray-900"> {filteredProducts.length}개의 상품</span>을 찾았습니다
+    <div className="border-t border-gray-100 bg-white">
+      <div className="mx-auto max-w-[1280px] px-6 py-8 md:px-8">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm text-gray-500">
+              {searchQuery ? (
+                <>
+                  <span className="font-semibold text-gray-900">
+                    “{searchQuery}”
+                  </span>
+                  에 대한 검색 결과입니다.
+                </>
+              ) : (
+                "추천 상품을 확인해 보세요."
+              )}
+            </p>
+            {selectedCategory !== "all" && selectedCategory && (
+              <p className="text-xs text-gray-400">
+                선택된 카테고리: {selectedCategory}
               </p>
-            </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="h-9 w-[120px] md:hidden"
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              필터
+            </Button>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-9 w-[150px]">
+                <SelectValue placeholder="정렬" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="popular">인기순</SelectItem>
+                <SelectItem value="latest">최신순</SelectItem>
+                <SelectItem value="price-low">낮은 가격순</SelectItem>
+                <SelectItem value="price-high">높은 가격순</SelectItem>
+                <SelectItem value="rating">평점순</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      )}
 
-      <div className="flex gap-6">
-        {/* Filters Sidebar */}
-        <div className={`${showFilters ? 'block' : 'hidden'} md:block w-full md:w-56 shrink-0`}>
-          <div className="border border-gray-200 rounded p-4 sticky top-24 bg-white">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                필터
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => {
-                  setSelectedBrands([]);
-                  setPriceRange([0, 200000]);
-                }}
-              >
-                초기화
-              </Button>
-            </div>
-
-            {/* Brand Filter */}
-            <div className="mb-6">
-              <h4 className="text-sm mb-3">브랜드</h4>
-              <div className="space-y-2">
-                {brands.map(brand => (
-                  <div key={brand} className="flex items-center gap-2">
-                    <Checkbox
-                      id={brand}
-                      checked={selectedBrands.includes(brand)}
-                      onCheckedChange={() => toggleBrand(brand)}
-                    />
-                    <label htmlFor={brand} className="text-sm cursor-pointer">
-                      {brand}
-                    </label>
+          <div className="flex flex-col gap-8 md:flex-row">
+            <Card
+              className={cn(
+                "w-full max-w-xs shrink-0 border-gray-200 md:block",
+                showFilters ? "block" : "hidden md:block",
+              )}
+            >
+              <div className="flex items-center justify-between border-b px-5 py-4">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  맞춤 필터
+                </h3>
+                <Button variant="ghost" size="sm" onClick={handleResetFilters}>
+                  초기화
+                </Button>
+              </div>
+              <div className="space-y-6 px-5 py-5">
+                <div>
+                  <h4 className="mb-3 flex items-center gap-2 text-sm font-medium text-gray-900">
+                    <Sparkles className="h-4 w-4" />
+                    카테고리
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="all-category"
+                        checked={selectedCategory === "all"}
+                        onCheckedChange={() => setSelectedCategory("all")}
+                      />
+                      <label
+                        htmlFor="all-category"
+                        className="cursor-pointer text-sm"
+                      >
+                        전체
+                      </label>
+                    </div>
+                    {Array.from(new Set(mockProducts.map((p) => p.category))).map(
+                      (category) => (
+                        <div key={category} className="flex items-center">
+                          <Checkbox
+                            id={`cat-${category}`}
+                            checked={selectedCategory === category}
+                            onCheckedChange={() =>
+                              setSelectedCategory(category)
+                            }
+                          />
+                          <label
+                            htmlFor={`cat-${category}`}
+                            className="ml-2 cursor-pointer text-sm"
+                          >
+                            {category}
+                          </label>
+                        </div>
+                      ),
+                    )}
                   </div>
+                </div>
+
+                <div>
+                  <h4 className="mb-3 text-sm font-medium text-gray-900">
+                    브랜드
+                  </h4>
+                  <div className="space-y-2">
+                    {brands.map((brand) => (
+                      <div key={brand} className="flex items-center">
+                        <Checkbox
+                          id={`brand-${brand}`}
+                          checked={selectedBrands.includes(brand)}
+                          onCheckedChange={() => toggleBrand(brand)}
+                        />
+                        <label
+                          htmlFor={`brand-${brand}`}
+                          className="ml-2 cursor-pointer text-sm"
+                        >
+                          {brand}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="mb-3 text-sm font-medium text-gray-900">
+                    가격
+                  </h4>
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    min={0}
+                    max={200000}
+                    step={10000}
+                    className="mb-3"
+                  />
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>{priceRange[0].toLocaleString()}원</span>
+                    <span>{priceRange[1].toLocaleString()}원</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+          <div className="flex-1">
+            {sortedProducts.length === 0 ? (
+              <div className="py-20 text-center">
+                <p className="text-gray-400">검색 결과가 없습니다.</p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => navigate("/")}
+                >
+                  홈으로 돌아가기
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {sortedProducts.map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    className="group cursor-pointer overflow-hidden rounded border border-gray-200 text-left transition hover:shadow-lg"
+                    onClick={() => handleProductClick(product.id)}
+                  >
+                    <div className="relative aspect-square overflow-hidden bg-gray-50">
+                      <ImageWithFallback
+                        src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80"
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {product.originalPrice && (
+                        <Badge className="absolute left-2 top-2 border-0 bg-red-500 text-xs text-white">
+                          {Math.round(
+                            (1 - product.price / product.originalPrice) * 100,
+                          )}
+                          %
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="space-y-2 p-4">
+                      <p className="text-xs text-gray-500">{product.brand}</p>
+                      <p className="line-clamp-2 h-10 text-sm text-gray-900">
+                        {product.name}
+                      </p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-lg font-semibold text-gray-900">
+                          {product.price.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-gray-500">원</span>
+                      </div>
+                      {product.originalPrice && (
+                        <p className="text-xs text-gray-400 line-through">
+                          {product.originalPrice.toLocaleString()}원
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Star className="h-3 w-3 fill-gray-900 text-gray-900" />
+                        <span>{product.rating}</span>
+                        <span className="text-gray-400">
+                          ({product.reviewCount.toLocaleString()})
+                        </span>
+                      </div>
+                    </div>
+                  </button>
                 ))}
               </div>
-            </div>
-
-            {/* Price Filter */}
-            <div className="mb-6">
-              <h4 className="text-sm mb-3">가격</h4>
-              <div className="px-2">
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  min={0}
-                  max={200000}
-                  step={10000}
-                  className="mb-3"
-                />
-                <div className="flex justify-between text-xs text-gray-600">
-                  <span>{priceRange[0].toLocaleString()}원</span>
-                  <span>{priceRange[1].toLocaleString()}원</span>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="flex-1">
-          {/* Sort and Filter Toggle */}
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-600">
-              총 <span className="text-gray-900">{filteredProducts.length}</span>개
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="md:hidden h-8 text-xs"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter className="w-3 h-3 mr-1" />
-                필터
-              </Button>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[120px] h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popular">인기순</SelectItem>
-                  <SelectItem value="latest">최신순</SelectItem>
-                  <SelectItem value="price-low">낮은 가격순</SelectItem>
-                  <SelectItem value="price-high">높은 가격순</SelectItem>
-                  <SelectItem value="rating">평점순</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Product Grid */}
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-gray-400">검색 결과가 없습니다</p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => onNavigate('home')}
-              >
-                홈으로 돌아가기
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map(product => (
-                <div
-                  key={product.id}
-                  className="cursor-pointer group"
-                  onClick={() => onNavigate('product-detail', product.id)}
-                >
-                  <div className="relative aspect-square bg-gray-50 mb-2 overflow-hidden border border-gray-200 rounded">
-                    <ImageWithFallback
-                      src={`https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80`}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {product.originalPrice && (
-                      <Badge className="absolute top-2 left-2 bg-red-500 text-white border-0 text-xs">
-                        {Math.round((1 - product.price / product.originalPrice) * 100)}%
-                      </Badge>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
-                    <p className="text-sm mb-1 line-clamp-2 h-10">{product.name}</p>
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="text-lg">{product.price.toLocaleString()}</span>
-                      <span className="text-sm">원</span>
-                    </div>
-                    {product.originalPrice && (
-                      <p className="text-xs text-gray-400 line-through mb-1">
-                        {product.originalPrice.toLocaleString()}원
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                      <Star className="w-3 h-3 fill-gray-900 text-gray-900" />
-                      <span>{product.rating}</span>
-                      <span className="text-gray-400">({product.reviewCount.toLocaleString()})</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -1,25 +1,66 @@
-import { User, Package, Heart, Star, Settings, LogOut, ChevronRight } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { Separator } from './ui/separator';
-import type { Page, User as UserType } from '../App';
+import {
+  ChevronRight,
+  Heart,
+  LogOut,
+  Package,
+  Settings,
+  Star,
+  User as UserIcon,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useAppState } from "../context/app-state";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Separator } from "./ui/separator";
 
-interface MyPageProps {
-  currentUser: UserType | null;
-  onNavigate: (page: Page) => void;
-  onLogout: () => void;
-}
+const menuItems = [
+  {
+    icon: Package,
+    title: "주문/배송 조회",
+    description: "주문 기록과 배송 상태를 확인하세요.",
+    path: "/orders",
+  },
+  {
+    icon: Heart,
+    title: "찜한 상품",
+    description: "관심 있는 상품을 모아보세요.",
+    path: "/wishlist",
+  },
+  {
+    icon: Star,
+    title: "상품 리뷰",
+    description: "작성한 리뷰와 포인트를 확인하세요.",
+    path: "/reviews",
+  },
+  {
+    icon: Settings,
+    title: "회원 정보 수정",
+    description: "비밀번호, 주소 등 정보를 변경하세요.",
+    path: "/settings",
+  },
+];
 
-export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
+export function MyPage() {
+  const navigate = useNavigate();
+  const { currentUser, logout } = useAppState();
+
   if (!currentUser) {
     return (
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-20 text-center">
-        <User className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-        <h2 className="text-xl mb-4">로그인이 필요합니다</h2>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
+        <UserIcon className="h-16 w-16 text-gray-300" />
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">
+            로그인이 필요합니다
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            로그인하고 주문 내역과 맞춤 추천을 확인해 보세요.
+          </p>
+        </div>
         <Button
-          onClick={() => onNavigate('login')}
-          className="bg-gray-900 hover:bg-black text-white"
+          className="h-11 px-8 bg-gray-900 text-white hover:bg-black"
+          onClick={() => navigate("/login")}
         >
           로그인하기
         </Button>
@@ -27,198 +68,122 @@ export function MyPage({ currentUser, onNavigate, onLogout }: MyPageProps) {
     );
   }
 
-  const menuItems = [
-    {
-      icon: Package,
-      title: '주문/배송 조회',
-      description: '주문 내역 및 배송 상태 확인',
-      action: () => onNavigate('orders')
-    },
-    {
-      icon: Heart,
-      title: '찜한 상품',
-      description: '관심 상품 모아보기',
-      action: () => {}
-    },
-    {
-      icon: Star,
-      title: '내가 쓴 리뷰',
-      description: '작성한 리뷰 관리',
-      action: () => {}
-    },
-    {
-      icon: Settings,
-      title: '회원정보 수정',
-      description: '개인정보 및 설정 변경',
-      action: () => {}
-    }
-  ];
+  const initials = currentUser.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-6">
-        <h1 className="text-2xl mb-6">마이페이지</h1>
-        <div className="grid md:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="md:col-span-1">
-            <div className="bg-white border border-gray-200 p-6">
-              <div className="flex flex-col items-center mb-6">
-                <Avatar className="w-16 h-16 mb-3">
-                  <AvatarFallback className="bg-gray-900 text-white text-xl">
-                    {currentUser.name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <h2 className="mb-1">{currentUser.name}</h2>
-                <p className="text-xs text-gray-500">{currentUser.email}</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-[1100px] px-6 py-10 md:px-8">
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">마이페이지</h1>
+            <p className="text-sm text-gray-600">
+              주문 내역과 적립금, 배송지 정보를 빠르게 확인하세요.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="gap-2 text-sm"
+            onClick={() => {
+              logout();
+              toast.success("로그아웃되었습니다.");
+              navigate("/");
+            }}
+          >
+            <LogOut className="h-4 w-4" />
+            로그아웃
+          </Button>
+        </div>
+
+        <Card className="border-gray-200 p-6">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16 border border-gray-200">
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm text-gray-500">환영합니다</p>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {currentUser.name}님
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  {currentUser.email}
+                </p>
               </div>
-
-              <Separator className="my-4" />
-
-              <div className="space-y-1 text-sm">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                  onClick={() => onNavigate('orders')}
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  주문내역
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  찜한 상품
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  내 리뷰
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  설정
-                </Button>
-                <Separator className="my-2" />
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={onLogout}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  로그아웃
-                </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-center text-sm text-gray-700">
+              <div>
+                <p className="text-xs text-gray-500">적립금</p>
+                <p className="mt-1 text-base font-semibold text-gray-900">
+                  12,500P
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">쿠폰</p>
+                <p className="mt-1 text-base font-semibold text-gray-900">
+                  3장
+                </p>
               </div>
             </div>
           </div>
+        </Card>
 
-          {/* Main Content */}
-          <div className="md:col-span-3">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white border border-gray-200 p-4 text-center">
-                <p className="text-gray-600 text-xs mb-1">진행 중인 주문</p>
-                <p className="text-xl text-gray-900">2</p>
-              </div>
-              <div className="bg-white border border-gray-200 p-4 text-center">
-                <p className="text-gray-600 text-xs mb-1">배송 완료</p>
-                <p className="text-xl">8</p>
-              </div>
-              <div className="bg-white border border-gray-200 p-4 text-center">
-                <p className="text-gray-600 text-xs mb-1">찜한 상품</p>
-                <p className="text-xl">15</p>
-              </div>
-              <div className="bg-white border border-gray-200 p-4 text-center">
-                <p className="text-gray-600 text-xs mb-1">작성한 리뷰</p>
-                <p className="text-xl">6</p>
-              </div>
-            </div>
-
-            {/* Menu Grid */}
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              {menuItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 p-5 cursor-pointer hover:border-gray-900 transition-colors"
-                  onClick={item.action}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-900/10 rounded-full flex items-center justify-center">
-                        <item.icon className="w-5 h-5 text-gray-900" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm mb-0.5">{item.title}</h3>
-                        <p className="text-xs text-gray-500">{item.description}</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {menuItems.map(({ icon: Icon, title, description, path }) => (
+            <Card
+              key={title}
+              className="group cursor-pointer border-gray-200 p-5 transition hover:border-gray-300 hover:shadow-md"
+              onClick={() => {
+                if (path === "/wishlist" || path === "/reviews" || path === "/settings") {
+                  toast.info("해당 메뉴는 추후 제공될 예정입니다.");
+                } else {
+                  navigate(path);
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{title}</p>
+                    <p className="text-xs text-gray-500">{description}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <ChevronRight className="h-4 w-4 text-gray-400 transition group-hover:text-gray-600" />
+              </div>
+            </Card>
+          ))}
+        </div>
 
-            {/* User Info */}
-            <div className="bg-white border border-gray-200 p-6">
-              <h3 className="mb-4">회원 정보</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-600">이름</span>
-                  <span>{currentUser.name}</span>
-                </div>
-                <div className="flex justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-600">이메일</span>
-                  <span>{currentUser.email}</span>
-                </div>
-                <div className="flex justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-600">휴대폰</span>
-                  <span>{currentUser.phone}</span>
-                </div>
-                <div className="flex justify-between py-3 border-b border-gray-100">
-                  <span className="text-gray-600">기본 배송지</span>
-                  <span className="text-right">{currentUser.address}</span>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-6">
-                <Button variant="outline" className="flex-1 h-9 text-sm">
-                  정보 수정
-                </Button>
-                <Button variant="outline" className="flex-1 h-9 text-sm">
-                  비밀번호 변경
-                </Button>
-              </div>
-            </div>
+        <Separator className="my-8" />
 
-            {/* Account Actions */}
-            <div className="bg-white border border-gray-200 p-6 mt-6">
-              <h3 className="mb-4">계정 관리</h3>
-              <div className="space-y-2 text-sm">
-                <Button variant="outline" className="w-full justify-between h-9">
-                  알림 설정
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" className="w-full justify-between h-9">
-                  결제 수단 관리
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" className="w-full justify-between h-9">
-                  배송지 관리
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Separator className="my-2" />
-                <Button variant="ghost" className="w-full justify-between text-gray-600 h-9">
-                  회원 탈퇴
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
+        <Card className="border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900">기본 정보</h2>
+          <div className="mt-4 grid gap-3 text-sm text-gray-700 md:grid-cols-2">
+            <div>
+              <p className="text-xs text-gray-500">이름</p>
+              <p className="mt-1">{currentUser.name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">이메일</p>
+              <p className="mt-1">{currentUser.email}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">전화번호</p>
+              <p className="mt-1">{currentUser.phone || "미입력"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">배송지</p>
+              <p className="mt-1">{currentUser.address || "미입력"}</p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
