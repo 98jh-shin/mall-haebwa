@@ -6,7 +6,7 @@ import os
 load_dotenv()
 
 _MONGO_URI = os.getenv(
-    "MONGODB_URI", "mongodb://3.35.21.238:27017/ecommerce_ai")
+    "MONGODB_URI", "mongodb://43.200.172.45/ecommerce_ai")
 DB_NAME = os.getenv("DB_NAME", "ai-shop")
 DB_PRODUCT = os.getenv("DB_NAME", "naver_shopping")
 _client: AsyncIOMotorClient | None = None
