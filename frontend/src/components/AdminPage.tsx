@@ -1,304 +1,279 @@
-import { useState } from 'react';
-import { Package, ShoppingCart, Users, Tag, TrendingUp, BarChart3, Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { toast } from 'sonner@2.0.3';
-import type { Page, Product, Order } from '../App';
+import { useMemo, useState } from "react";
+import {
+  BarChart3,
+  Edit,
+  Eye,
+  Filter,
+  Package,
+  Plus,
+  Search,
+  ShoppingCart,
+  Tag,
+  Trash2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Textarea } from "./ui/textarea";
 
-interface AdminPageProps {
-  onNavigate: (page: Page) => void;
+interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  status: "판매중" | "품절" | "숨김";
 }
 
-// Mock data
-const mockProducts: Product[] = [
+const inventory: InventoryItem[] = [
   {
-    id: '1',
-    name: '여름 시원한 린넨 반팔 셔츠',
+    id: "SKU-001",
+    name: "여름 린넨 반팔 셔츠",
+    category: "패션의류",
     price: 29900,
-    originalPrice: 45000,
-    image: 'fashion shirt',
-    category: 'fashion',
-    brand: '베이직코튼',
-    rating: 4.8,
-    reviewCount: 1234,
-    description: '시원한 린넨 소재',
-    images: [],
-    colors: ['화이트', '블랙', '네이비'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    stock: 150
+    stock: 150,
+    status: "판매중",
   },
   {
-    id: '2',
-    name: '편안한 운동화 데일리 스니커즈',
+    id: "SKU-002",
+    name: "데일리 클래식 스니커즈",
+    category: "패션의류",
     price: 49900,
-    originalPrice: 79000,
-    image: 'casual sneakers',
-    category: 'fashion',
-    brand: '워크앤런',
-    rating: 4.9,
-    reviewCount: 2341,
-    description: '편안한 스니커즈',
-    images: [],
-    colors: ['화이트', '블랙'],
-    sizes: ['230', '240', '250', '260', '270'],
-    stock: 200
-  }
-];
-
-const mockOrders: Order[] = [
+    stock: 85,
+    status: "판매중",
+  },
   {
-    id: 'ORD-20251028-001',
-    date: '2025-10-28',
-    items: [
-      {
-        product: mockProducts[0],
-        quantity: 2,
-        selectedColor: '화이트',
-        selectedSize: 'L'
+    id: "SKU-003",
+    name: "민감성 보습 크림",
+    category: "뷰티",
+    price: 24900,
+    stock: 0,
+    status: "품절",
+  },
+  {
+    id: "SKU-004",
+    name: "프리미엄 요가 매트",
+    category: "스포츠/레저",
+    price: 39900,
+    stock: 210,
+    status: "판매중",
+  },
+];
+
+const summaryCards = [
+  {
+    title: "오늘 주문",
+    value: "128건",
+    icon: ShoppingCart,
+    delta: "+18% vs. yesterday",
+  },
+  {
+    title: "매출",
+    value: "₩2,450,000",
+    icon: TrendingUp,
+    delta: "+6.4% vs. last week",
+  },
+  {
+    title: "신규 회원",
+    value: "52명",
+    icon: Users,
+    delta: "+12% vs. last week",
+  },
+  {
+    title: "재고 경고",
+    value: "3건",
+    icon: Package,
+    delta: "Low stock alert",
+  },
+];
+
+export function AdminPage() {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filteredInventory = useMemo(() => {
+    return inventory.filter((item) => {
+      if (categoryFilter !== "all" && item.category !== categoryFilter) {
+        return false;
       }
-    ],
-    total: 59800,
-    status: '배송 중',
-    address: '서울시 강남구 테헤란로 123'
-  }
-];
+      if (statusFilter !== "all" && item.status !== statusFilter) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        return item.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+      }
+      return true;
+    });
+  }, [categoryFilter, searchQuery, statusFilter]);
 
-const mockCustomers = [
-  { id: '1', name: '홍길동', email: 'hong@example.com', grade: 'VIP', orders: 15, totalSpent: 1500000 },
-  { id: '2', name: '김철수', email: 'kim@example.com', grade: '일반', orders: 3, totalSpent: 250000 },
-  { id: '3', name: '이영희', email: 'lee@example.com', grade: '신규', orders: 1, totalSpent: 89000 }
-];
-
-const mockCoupons = [
-  { id: '1', code: 'WELCOME10', discount: 10, type: '퍼센트', active: true, used: 45 },
-  { id: '2', code: 'SUMMER2025', discount: 5000, type: '금액', active: true, used: 123 }
-];
-
-export function AdminPage({ onNavigate }: AdminPageProps) {
-  const [selectedTab, setSelectedTab] = useState('dashboard');
-
-  // Dashboard stats
-  const stats = {
-    todaySales: 2450000,
-    monthSales: 45670000,
-    totalOrders: 342,
-    newCustomers: 28,
-    totalProducts: 156,
-    lowStock: 12
+  const handleDelete = (id: string) => {
+    toast.info(`상품 ${id} 삭제는 아직 구현되지 않았습니다.`);
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-[1280px] px-6 py-8 md:px-8">
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl mb-1">셀러 센터</h1>
-            <p className="text-sm text-gray-600">상품과 주문을 관리하고 매출을 분석하세요</p>
+            <h1 className="text-2xl font-semibold text-gray-900">관리자 대시보드</h1>
+            <p className="text-sm text-gray-600">
+              판매 현황과 재고를 한눈에 확인하고 상품을 관리하세요.
+            </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => onNavigate('home')}
-          >
-            쇼핑몰로 돌아가기
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="gap-2 text-sm">
+              <BarChart3 className="h-4 w-4" />
+              레포트 다운로드
+            </Button>
+            <Button className="gap-2 bg-gray-900 text-white hover:bg-black" onClick={() => navigate("/add-product")}>
+              <Plus className="h-4 w-4" />
+              상품 등록
+            </Button>
+          </div>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="mb-6 bg-white border">
-            <TabsTrigger value="dashboard" className="gap-2">
-              <BarChart3 className="w-4 h-4" />
-              대시보드
-            </TabsTrigger>
-            <TabsTrigger value="products" className="gap-2">
-              <Package className="w-4 h-4" />
-              상품 관리
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="gap-2">
-              <ShoppingCart className="w-4 h-4" />
-              주문/배송
-            </TabsTrigger>
-            <TabsTrigger value="customers" className="gap-2">
-              <Users className="w-4 h-4" />
-              회원 관리
-            </TabsTrigger>
-            <TabsTrigger value="promotions" className="gap-2">
-              <Tag className="w-4 h-4" />
-              쿠폰/프로모션
-            </TabsTrigger>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {summaryCards.map(({ title, value, icon: Icon, delta }) => (
+            <Card key={title} className="space-y-3 border-gray-200 p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-500">{title}</span>
+                <Icon className="h-4 w-4 text-gray-400" />
+              </div>
+              <p className="text-2xl font-semibold text-gray-900">{value}</p>
+              <span className="text-xs text-emerald-600">{delta}</span>
+            </Card>
+          ))}
+        </div>
+
+        <Tabs defaultValue="inventory" className="mt-8">
+          <TabsList className="bg-white">
+            <TabsTrigger value="inventory">재고 관리</TabsTrigger>
+            <TabsTrigger value="orders">주문 현황</TabsTrigger>
+            <TabsTrigger value="coupons">쿠폰/프로모션</TabsTrigger>
           </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">오늘 매출</p>
-                <p className="text-xl text-gray-900">{stats.todaySales.toLocaleString()}원</p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">이번 달 매출</p>
-                <p className="text-xl text-gray-900">{stats.monthSales.toLocaleString()}원</p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">총 주문</p>
-                <p className="text-xl text-gray-900">{stats.totalOrders}</p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">신규 고객</p>
-                <p className="text-xl text-gray-900">{stats.newCustomers}</p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">전체 상품</p>
-                <p className="text-xl text-gray-900">{stats.totalProducts}</p>
-              </Card>
-              <Card className="p-4">
-                <p className="text-xs text-gray-600 mb-1">재고 부족</p>
-                <p className="text-xl text-red-600">{stats.lowStock}</p>
-              </Card>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              {/* Sales Chart */}
-              <Card className="p-6">
-                <h3 className="mb-4">주간 매출 추이</h3>
-                <div className="h-64 flex items-end justify-between gap-2">
-                  {['월', '화', '수', '목', '금', '토', '일'].map((day, i) => (
-                    <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="w-full bg-gray-900 rounded-t" style={{ height: `${(i + 1) * 30}px` }}></div>
-                      <span className="text-xs text-gray-600">{day}</span>
-                    </div>
-                  ))}
+          <TabsContent value="inventory" className="mt-6 space-y-4">
+            <Card className="border-gray-200 p-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex w-full flex-col gap-2 text-sm text-gray-600 md:w-auto">
+                  <span>총 {filteredInventory.length}개의 상품이 검색되었습니다.</span>
                 </div>
-              </Card>
-
-              {/* Top Products */}
-              <Card className="p-6">
-                <h3 className="mb-4">인기 상품 Top 5</h3>
-                <div className="space-y-3">
-                  {mockProducts.slice(0, 2).map((product, i) => (
-                    <div key={product.id} className="flex items-center gap-3 pb-3 border-b">
-                      <span className="text-sm w-6">{i + 1}</span>
-                      <div className="flex-1">
-                        <p className="text-sm mb-1">{product.name}</p>
-                        <p className="text-xs text-gray-500">판매량: {product.reviewCount}</p>
-                      </div>
-                      <span className="text-sm">{product.price.toLocaleString()}원</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-
-            {/* Recent Orders */}
-            <Card className="p-6">
-              <h3 className="mb-4">최근 주문</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>주문번호</TableHead>
-                    <TableHead>날짜</TableHead>
-                    <TableHead>상품</TableHead>
-                    <TableHead>금액</TableHead>
-                    <TableHead>상태</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockOrders.map(order => (
-                    <TableRow key={order.id}>
-                      <TableCell className="text-sm">{order.id}</TableCell>
-                      <TableCell className="text-sm">{order.date}</TableCell>
-                      <TableCell className="text-sm">{order.items[0].product.name}</TableCell>
-                      <TableCell className="text-sm">{order.total.toLocaleString()}원</TableCell>
-                      <TableCell>
-                        <Badge className="bg-blue-100 text-blue-700 text-xs">{order.status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input placeholder="상품 검색..." className="pl-10 w-80" />
+                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="상품명을 검색하세요"
+                      className="h-10 md:w-[220px]"
+                    />
+                    <Button variant="outline" className="h-10 gap-2 text-sm">
+                      <Search className="h-4 w-4" />
+                      검색
+                    </Button>
                   </div>
-                  <Select defaultValue="all">
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">전체 카테고리</SelectItem>
-                      <SelectItem value="fashion">패션의류</SelectItem>
-                      <SelectItem value="beauty">뷰티</SelectItem>
-                      <SelectItem value="digital">가전디지털</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2">
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="h-10 w-[150px]">
+                        <SelectValue placeholder="카테고리" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">전체</SelectItem>
+                        {Array.from(new Set(inventory.map((item) => item.category))).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="h-10 w-[150px]">
+                        <SelectValue placeholder="상태" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">전체</SelectItem>
+                        <SelectItem value="판매중">판매중</SelectItem>
+                        <SelectItem value="품절">품절</SelectItem>
+                        <SelectItem value="숨김">숨김</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" className="h-10 gap-2">
+                      <Filter className="h-4 w-4" />
+                      필터
+                    </Button>
+                  </div>
                 </div>
-                <Button 
-                  className="bg-gray-900 hover:bg-black text-white gap-2"
-                  onClick={() => onNavigate('add-product')}
-                >
-                  <Plus className="w-4 h-4" />
-                  상품 등록
-                </Button>
               </div>
+            </Card>
 
+            <Card className="border-gray-200">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>이미지</TableHead>
+                    <TableHead className="w-[120px]">SKU</TableHead>
                     <TableHead>상품명</TableHead>
-                    <TableHead>카테고리</TableHead>
-                    <TableHead>가격</TableHead>
-                    <TableHead>재고</TableHead>
-                    <TableHead>판매량</TableHead>
-                    <TableHead>상태</TableHead>
-                    <TableHead>관리</TableHead>
+                    <TableHead className="w-[120px]">카테고리</TableHead>
+                    <TableHead className="w-[100px] text-right">가격</TableHead>
+                    <TableHead className="w-[80px] text-right">재고</TableHead>
+                    <TableHead className="w-[80px] text-center">상태</TableHead>
+                    <TableHead className="w-[130px] text-right">관리</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockProducts.map(product => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <div className="w-12 h-12 bg-gray-100 rounded"></div>
+                  {filteredInventory.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-mono text-xs text-gray-500">
+                        {item.id}
                       </TableCell>
-                      <TableCell className="text-sm">{product.name}</TableCell>
-                      <TableCell className="text-sm">{product.category}</TableCell>
-                      <TableCell className="text-sm">{product.price.toLocaleString()}원</TableCell>
-                      <TableCell>
-                        <Badge className={product.stock < 50 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}>
-                          {product.stock}
-                        </Badge>
+                      <TableCell className="font-medium text-gray-900">
+                        {item.name}
                       </TableCell>
-                      <TableCell className="text-sm">{product.reviewCount}</TableCell>
-                      <TableCell>
-                        <Badge className="bg-green-100 text-green-700 text-xs">판매중</Badge>
+                      <TableCell className="text-sm text-gray-600">
+                        {item.category}
+                      </TableCell>
+                      <TableCell className="text-right text-sm text-gray-900">
+                        ₩{item.price.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right text-sm text-gray-900">
+                        {item.stock}
+                      </TableCell>
+                      <TableCell className="text-center text-xs">
+                        <span
+                          className="inline-flex rounded-full px-2 py-1 text-xs"
+                          data-status={item.status}
+                        >
+                          {item.status}
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Eye className="w-4 h-4" />
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.info("미리보기 준비 중입니다.")}>
+                            <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <Edit className="w-4 h-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => navigate("/add-product")}
+                          >
+                            <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600">
-                            <Trash2 className="w-4 h-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:text-red-600"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -309,193 +284,49 @@ export function AdminPage({ onNavigate }: AdminPageProps) {
             </Card>
           </TabsContent>
 
-          {/* Orders Tab */}
-          <TabsContent value="orders">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Input placeholder="주문번호 검색..." className="w-64" />
-                  <Select defaultValue="all">
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">전체 상태</SelectItem>
-                      <SelectItem value="preparing">배송 준비 중</SelectItem>
-                      <SelectItem value="shipping">배송 중</SelectItem>
-                      <SelectItem value="delivered">배송 완료</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          <TabsContent value="orders" className="mt-6">
+            <Card className="border-gray-200 p-6">
+              <div className="mb-6 flex items-center gap-2">
+                <Tag className="h-4 w-4 text-gray-500" />
+                <h2 className="text-lg font-semibold text-gray-900">
+                  최근 주문 요약
+                </h2>
               </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>주문번호</TableHead>
-                    <TableHead>주문일시</TableHead>
-                    <TableHead>고객명</TableHead>
-                    <TableHead>상품</TableHead>
-                    <TableHead>결제금액</TableHead>
-                    <TableHead>배송상태</TableHead>
-                    <TableHead>관리</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockOrders.map(order => (
-                    <TableRow key={order.id}>
-                      <TableCell className="text-sm">{order.id}</TableCell>
-                      <TableCell className="text-sm">{order.date}</TableCell>
-                      <TableCell className="text-sm">홍길동</TableCell>
-                      <TableCell className="text-sm">{order.items[0].product.name}</TableCell>
-                      <TableCell className="text-sm">{order.total.toLocaleString()}원</TableCell>
-                      <TableCell>
-                        <Select defaultValue={order.status}>
-                          <SelectTrigger className="w-32 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="배송 준비 중">배송 준비 중</SelectItem>
-                            <SelectItem value="배송 중">배송 중</SelectItem>
-                            <SelectItem value="배송 완료">배송 완료</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" className="h-8 text-xs">
-                          상세보기
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <p className="text-sm text-gray-600">
+                주문 상세 페이지는 API 연동 이후 제공될 예정입니다.
+              </p>
             </Card>
           </TabsContent>
 
-          {/* Customers Tab */}
-          <TabsContent value="customers">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Input placeholder="회원 검색..." className="w-64" />
-                  <Select defaultValue="all">
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">전체 등급</SelectItem>
-                      <SelectItem value="vip">VIP</SelectItem>
-                      <SelectItem value="regular">일반</SelectItem>
-                      <SelectItem value="new">신규</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <TabsContent value="coupons" className="mt-6">
+            <Card className="border-gray-200 p-6 space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  새로운 쿠폰 생성
+                </h2>
+                <p className="text-sm text-gray-600">
+                  프로모션 쿠폰을 발급하여 고객에게 혜택을 제공하세요.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="couponName">쿠폰명</Label>
+                  <Input id="couponName" placeholder="예) 신규 회원 10% 할인" className="mt-1.5" />
+                </div>
+                <div>
+                  <Label htmlFor="couponDiscount">할인율</Label>
+                  <Input id="couponDiscount" type="number" min={0} max={100} placeholder="예) 10" className="mt-1.5" />
                 </div>
               </div>
-
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>회원명</TableHead>
-                    <TableHead>이메일</TableHead>
-                    <TableHead>등급</TableHead>
-                    <TableHead>총 주문</TableHead>
-                    <TableHead>총 구매액</TableHead>
-                    <TableHead>관리</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockCustomers.map(customer => (
-                    <TableRow key={customer.id}>
-                      <TableCell className="text-sm">{customer.name}</TableCell>
-                      <TableCell className="text-sm">{customer.email}</TableCell>
-                      <TableCell>
-                        <Badge className={
-                          customer.grade === 'VIP' 
-                            ? 'bg-yellow-100 text-yellow-700' 
-                            : customer.grade === '신규'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }>
-                          {customer.grade}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">{customer.orders}회</TableCell>
-                      <TableCell className="text-sm">{customer.totalSpent.toLocaleString()}원</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" className="h-8 text-xs">
-                          상세보기
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div>
+                <Label htmlFor="couponDescription">쿠폰 설명</Label>
+                <Textarea id="couponDescription" rows={4} className="mt-1.5" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline">초기화</Button>
+                <Button className="bg-gray-900 text-white hover:bg-black">쿠폰 생성</Button>
+              </div>
             </Card>
-          </TabsContent>
-
-          {/* Promotions Tab */}
-          <TabsContent value="promotions">
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Coupons */}
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3>쿠폰 관리</h3>
-                  <Button className="bg-gray-900 hover:bg-black text-white h-9 text-sm">
-                    <Plus className="w-4 h-4 mr-1" />
-                    쿠폰 생성
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  {mockCoupons.map(coupon => (
-                    <div key={coupon.id} className="border border-gray-200 p-4 rounded">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-mono text-sm">{coupon.code}</span>
-                        <Badge className={coupon.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                          {coupon.active ? '활성' : '비활성'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>
-                          {coupon.discount}{coupon.type === '퍼센트' ? '%' : '원'} 할인
-                        </span>
-                        <span>사용: {coupon.used}회</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Banners */}
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3>배너 관리</h3>
-                  <Button className="bg-gray-900 hover:bg-black text-white h-9 text-sm">
-                    <Plus className="w-4 h-4 mr-1" />
-                    배너 등록
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  <div className="border border-gray-200 p-4 rounded">
-                    <div className="w-full h-24 bg-gray-100 rounded mb-3"></div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm mb-1">여름 세일 배너</p>
-                        <p className="text-xs text-gray-500">메인 페이지</p>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-red-600">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </div>
