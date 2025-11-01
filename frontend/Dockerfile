@@ -1,6 +1,9 @@
 # Node.js 베이스 이미지
 FROM node:20-alpine
 
+RUN apk add --no-cache git python3 make g++
+
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
