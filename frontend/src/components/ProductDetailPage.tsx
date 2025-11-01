@@ -1,321 +1,308 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
+  Heart,
+  Minus,
+  Plus,
+  RotateCcw,
+  Share2,
+  Shield,
   Star,
   Truck,
-  Shield,
-  RotateCcw,
-  Plus,
-  Minus,
-  Heart,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useAppState } from "../context/app-state";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Separator } from "./ui/separator";
-import { toast } from "sonner";
-import type { Page, CartItem, User, Review, Product } from "../App";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-interface ProductDetailPageProps {
-  productId: string;
-  onNavigate: (page: Page) => void;
-  onAddToCart: (item: CartItem) => void;
-  currentUser: User | null;
-}
+const productCatalog = [
+  {
+    id: "1",
+    name: "여름 린넨 반팔 셔츠",
+    price: 29900,
+    originalPrice: 45000,
+    category: "패션의류",
+    brand: "베이직코드",
+    rating: 4.8,
+    reviewCount: 1234,
+    images: [
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&q=80",
+      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80",
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80",
+    ],
+    colors: ["화이트", "블랙", "라이트블루", "베이지"],
+    sizes: ["S", "M", "L", "XL"],
+    description:
+      "시원한 린넨 소재로 제작된 여름 셔츠입니다. 하루 종일 편안하게 착용할 수 있으며 포멀한 자리에서도 잘 어울립니다.",
+    stock: 150,
+  },
+  {
+    id: "2",
+    name: "프리미엄 요가 매트",
+    price: 39900,
+    category: "스포츠/레저",
+    brand: "핏플랜",
+    rating: 4.7,
+    reviewCount: 678,
+    images: [
+      "https://images.unsplash.com/photo-1593810450967-f9c42742e326?w=800&q=80",
+    ],
+    colors: ["퍼플", "핑크", "그레이"],
+    sizes: ["기본"],
+    description:
+      "두께 10mm의 프리미엄 요가 매트로, 쿠션감이 뛰어나고 미끄럼 방지 처리가 되어 안정적인 운동이 가능합니다.",
+    stock: 250,
+  },
+];
 
-// 백엔드 상품 스키마에 맞춘 타입
-interface DetailProduct {
-  id: string;
-  title: string;
-  link?: string;
-  image?: string;
-  lprice?: string;
-  mallName?: string;
-  maker?: string;
-  brand?: string;
-  category1?: string;
-  category2?: string;
-  category3?: string;
-  category4?: string;
-  productid?: string;
-  description?: string;
-}
+export function ProductDetailPage() {
+  const navigate = useNavigate();
+  const { productId = "1" } = useParams();
+  const { addToCart, currentUser } = useAppState();
+  const product = useMemo(
+    () => productCatalog.find((item) => item.id === productId) ?? productCatalog[0],
+    [productId],
+  );
 
-export function ProductDetailPage({
-  productId,
-  onNavigate,
-  onAddToCart,
-  currentUser,
-}: ProductDetailPageProps) {
-  const [product, setProduct] = useState<DetailProduct | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const [isLiked, setIsLiked] = useState(false);
-
-  // ✅ 상품 정보 불러오기
-  useEffect(() => {
-    fetch(`http://localhost:8000/admin/public/products/${productId}`, {
-      credentials: "include",
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || "상품 정보 요청 실패");
-        }
-        return res.json();
-      })
-      .then((data: DetailProduct) => setProduct(data))
-      .catch((e) =>
-        toast.error(e.message || "상품 정보를 불러오지 못했습니다.")
-      );
-  }, [productId]);
+  const [selectedColor, setSelectedColor] = useState(
+    product.colors?.[0] ?? "기본",
+  );
+  const [selectedSize, setSelectedSize] = useState(
+    product.sizes?.[0] ?? "기본",
+  );
+  const [activeImage, setActiveImage] = useState(0);
+  const [wishlist, setWishlist] = useState(false);
 
   const handleAddToCart = () => {
-    if (!product) return;
-
-    const cartProduct: Product = {
-      id: product.id,
-      name: product.title,
-      price: Number(product.lprice || 0),
-      originalPrice: undefined,
-      image: product.image || "/placeholder.png",
-      category: product.category1 || "",
-      brand: product.brand || "",
-      rating: 0,
-      reviewCount: 0,
-      description: product.description || "",
-      images: [],
-      colors: [],
-      sizes: [],
-      stock: 999,
-    };
-
-    onAddToCart({
-      product: cartProduct,
+    addToCart({
+      product,
       quantity,
-      selectedColor: "",
-      selectedSize: "",
+      selectedColor,
+      selectedSize,
     });
-    toast.success("장바구니에 담았습니다!", {
-      action: { label: "장바구니 보기", onClick: () => onNavigate("cart") },
+    toast.success("장바구니에 상품이 추가되었습니다.", {
+      action: {
+        label: "장바구니 보기",
+        onClick: () => navigate("/cart"),
+      },
     });
   };
 
   const handleBuyNow = () => {
     if (!currentUser) {
-      toast.error("로그인이 필요합니다.");
-      onNavigate("login");
+      toast.error("로그인 후 구매하실 수 있습니다.");
+      navigate("/login");
       return;
     }
     handleAddToCart();
-    onNavigate("cart");
+    navigate("/cart");
   };
-
-  if (!product)
-    return (
-      <div className="text-center py-20 text-gray-500">
-        상품 정보를 불러오는 중입니다...
-      </div>
-    );
 
   return (
     <div className="bg-white">
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 py-6">
-        {/* 🧭 Breadcrumb */}
-        <div className="flex items-center gap-2 mb-4 text-xs text-gray-500">
-          <button
-            onClick={() => onNavigate("home")}
-            className="hover:text-gray-900">
+      <div className="mx-auto max-w-[1100px] px-6 py-8 md:px-8">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <button type="button" onClick={() => navigate("/")}>
             홈
           </button>
-          <span>›</span>
-          <button
-            onClick={() => onNavigate("products")}
-            className="hover:text-gray-900">
-            {product.category1}
+          <span>/</span>
+          <button type="button" onClick={() => navigate("/products")}>
+            {product.category}
           </button>
-          <span>›</span>
-          <span className="text-gray-900">{product.title}</span>
+          <span>/</span>
+          <span className="text-gray-900">{product.name}</span>
         </div>
 
-        {/* 🖼️ 상품 이미지 + 정보 */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <div className="aspect-square bg-gray-50 border border-gray-200 overflow-hidden mb-3">
+            <div className="overflow-hidden border border-gray-200">
               <ImageWithFallback
-                src={product.image || "/placeholder.png"}
-                alt={product.title}
-                className="w-full h-full object-cover"
+                src={product.images?.[activeImage] ?? ""}
+                alt={product.name}
+                className="h-[420px] w-full object-cover"
               />
+            </div>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              {product.images?.map((image, index) => (
+                <button
+                  key={image}
+                  type="button"
+                  onClick={() => setActiveImage(index)}
+                  className={`border ${activeImage === index ? "border-gray-900" : "border-gray-200"}`}
+                >
+                  <ImageWithFallback
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    className="h-20 w-full object-cover"
+                  />
+                </button>
+              ))}
             </div>
           </div>
 
-          <div>
-            <div className="mb-6">
-              <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
-              <h1 className="text-2xl mb-3">{product.title}</h1>
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span>4.8</span>
-                <span className="text-sm text-gray-400">리뷰 123</span>
+          <Card className="space-y-6 border-gray-200 p-6">
+            <div className="space-y-3">
+              <Badge className="bg-gray-100 text-gray-700">{product.brand}</Badge>
+              <h1 className="text-2xl font-semibold text-gray-900">{product.name}</h1>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Star className="h-4 w-4 fill-gray-900 text-gray-900" />
+                <span>{product.rating}</span>
+                <span className="text-gray-400">({product.reviewCount.toLocaleString()} reviews)</span>
               </div>
             </div>
 
-            <div className="border-t border-b border-gray-200 py-6 mb-6">
-              {/* <div className="flex items-baseline gap-2 mb-2">
-                <Badge className="bg-red-500 text-white border-0">10%</Badge>
-              </div> */}
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl">
-                  {Number(product.lprice).toLocaleString("ko-KR")}원
-                </span>
-              </div>
+            <div>
+              <p className="text-3xl font-semibold text-gray-900">
+                ₩{product.price.toLocaleString()}
+              </p>
+              {product.originalPrice && (
+                <p className="text-sm text-gray-500 line-through">
+                  ₩{product.originalPrice.toLocaleString()}
+                </p>
+              )}
             </div>
 
-            {/* 수량 */}
-            <div className="mb-6">
-              <h3 className="text-sm mb-3">수량</h3>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-gray-300">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 w-9 p-0"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="w-12 text-center text-sm">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 w-9 p-0"
-                    onClick={() => setQuantity(quantity + 1)}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
+            {product.colors && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">컬러</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <Button
+                      key={color}
+                      type="button"
+                      variant={selectedColor === color ? "default" : "outline"}
+                      onClick={() => setSelectedColor(color)}
+                      className="h-9"
+                    >
+                      {color}
+                    </Button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* 총 금액 */}
-            <div className="bg-gray-50 border border-gray-200 p-4 mb-6">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">총 상품 금액</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl">
-                    {(Number(product.lprice || 0) * quantity).toLocaleString()}
-                  </span>
-                  <span>원</span>
+            {product.sizes && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">사이즈</p>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <Button
+                      key={size}
+                      type="button"
+                      variant={selectedSize === size ? "default" : "outline"}
+                      onClick={() => setSelectedSize(size)}
+                      className="h-9"
+                    >
+                      {size}
+                    </Button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* 액션 버튼 */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center rounded border border-gray-200">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="w-10 text-center">{quantity}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQuantity((prev) => prev + 1)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
               <Button
+                type="button"
                 variant="outline"
-                size="icon"
-                className="w-12 h-12"
-                onClick={() => setIsLiked(!isLiked)}>
-                <Heart
-                  className={`w-5 h-5 ${
-                    isLiked ? "fill-red-500 text-red-500" : ""
-                  }`}
-                />
+                onClick={() => setWishlist((prev) => !prev)}
+                className="gap-2"
+              >
+                <Heart className={`h-4 w-4 ${wishlist ? "fill-gray-900 text-gray-900" : ""}`} />
+                찜하기
               </Button>
               <Button
-                onClick={handleAddToCart}
-                className="flex-1 h-12 bg-white text-gray-900 border border-gray-300 hover:bg-gray-50">
-                장바구니
-              </Button>
-              <Button
-                onClick={handleBuyNow}
-                className="flex-1 h-12 bg-gray-900 hover:bg-black text-white">
-                구매하기
+                type="button"
+                variant="outline"
+                onClick={() => toast.info("공유 기능은 준비 중입니다.")}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                공유
               </Button>
             </div>
 
-            {/* 혜택 */}
-            <div className="border-t border-gray-200 pt-6 space-y-3 text-sm text-gray-600">
-              <div className="flex items-center gap-3">
-                <Truck className="w-4 h-4 text-gray-400" />
-                <span>무료배송 (3만원 이상 구매 시)</span>
+            <div className="space-y-3">
+              <Button
+                type="button"
+                className="h-11 w-full bg-gray-900 text-white hover:bg-black"
+                onClick={handleAddToCart}
+              >
+                장바구니에 담기
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 w-full"
+                onClick={handleBuyNow}
+              >
+                바로 구매하기
+              </Button>
+            </div>
+
+            <div className="grid gap-3 rounded border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-gray-400" />
+                <span>무료 배송 (₩30,000 이상 구매 시)</span>
               </div>
-              <div className="flex items-center gap-3">
-                <Shield className="w-4 h-4 text-gray-400" />
-                <span>100% 정품 보증</span>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-gray-400" />
+                <span>Mall 해봐 보증으로 안심하고 구매하세요.</span>
               </div>
-              <div className="flex items-center gap-3">
-                <RotateCcw className="w-4 h-4 text-gray-400" />
-                <span>7일 이내 무료 반품/교환</span>
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-gray-400" />
+                <span>수령 후 7일 이내 무료 반품 가능합니다.</span>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
-        {/* 상세탭 */}
-        <Tabs defaultValue="description" className="mb-12">
-          <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-            <TabsTrigger
-              value="description"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gray-900 rounded-none text-sm px-6">
-              상세정보
-            </TabsTrigger>
-            <TabsTrigger
-              value="reviews"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gray-900 rounded-none text-sm px-6">
-              리뷰
-            </TabsTrigger>
-            <TabsTrigger
-              value="qna"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gray-900 rounded-none text-sm px-6">
-              Q&A
-            </TabsTrigger>
-            <TabsTrigger
-              value="exchange"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-gray-900 rounded-none text-sm px-6">
-              교환/반품
-            </TabsTrigger>
+        <Tabs defaultValue="description" className="mt-10">
+          <TabsList>
+            <TabsTrigger value="description">상세 정보</TabsTrigger>
+            <TabsTrigger value="reviews">리뷰</TabsTrigger>
+            <TabsTrigger value="shipping">배송/반품 안내</TabsTrigger>
           </TabsList>
-
-          {/* 상세정보 */}
-          <TabsContent value="description" className="mt-6">
-            <Card className="p-8">
-              <h2 className="text-lg mb-4">상품 상세정보</h2>
-              <p className="text-sm text-gray-700 leading-relaxed mb-6">
-                {product.brand}의 인기 상품입니다. 네이버 쇼핑 최저가 기준
-                데이터를 사용합니다.
-              </p>
-              <ImageWithFallback
-                src={product.image}
-                alt={product.title}
-                className="w-full h-96 object-cover border border-gray-200 rounded"
-              />
-            </Card>
+          <TabsContent value="description" className="mt-6 space-y-4 text-sm text-gray-600">
+            <p>{product.description}</p>
+            <p>
+              린넨과 코튼 혼방 소재로 제작되어 구김이 적고 가볍습니다. 세탁 시 손세탁 또는 드라이클리닝을 권장합니다.
+            </p>
           </TabsContent>
-
-          {/* 리뷰 */}
           <TabsContent value="reviews" className="mt-6">
-            <Card className="p-8 text-center text-gray-500">
-              아직 등록된 리뷰가 없습니다.
+            <Card className="border-gray-200 p-6 text-sm text-gray-600">
+              리뷰 기능은 준비 중입니다. 구매 후 리뷰를 작성해 주세요!
             </Card>
           </TabsContent>
-
-          {/* Q&A */}
-          <TabsContent value="qna" className="mt-6">
-            <Card className="p-8 text-center text-gray-500">
-              아직 등록된 문의가 없습니다.
-            </Card>
-          </TabsContent>
-
-          {/* 교환/반품 */}
-          <TabsContent value="exchange" className="mt-6">
-            <Card className="p-8">
-              <h3 className="text-lg mb-4">교환 및 반품 안내</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                단순 변심의 경우 왕복 배송비(6,000원)는 고객 부담입니다. 상품
-                하자 또는 오배송의 경우 판매자가 부담합니다.
-              </p>
+          <TabsContent value="shipping" className="mt-6 text-sm text-gray-600">
+            <Card className="space-y-3 border-gray-200 p-6">
+              <p>오후 2시 이전 결제 시 당일 출고됩니다.</p>
+              <Separator />
+              <p>제주 및 도서산간 지역은 추가 배송비가 발생할 수 있습니다.</p>
             </Card>
           </TabsContent>
         </Tabs>

@@ -1,0 +1,47 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        # SSH 키 설정
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        
+        # EC2에 접속해서 배포
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'ENDSSH'
+          # 프로젝트 디렉토리로 이동
+          cd ~/mall-haebwa
+          
+          # 최신 코드 가져오기
+          echo "📥 Pulling latest code..."
+          git pull origin main
+          
+          # Docker 컨테이너 재시작 (빌드 없이!)
+          echo "🔄 Restarting containers..."
+          docker compose restart
+          
+          # 상태 확인
+          echo "📋 Container status:"
+          docker compose ps
+          
+          echo "✅ Deployment completed!"
+        ENDSSH
+        
+        # 키 파일 삭제
+        rm -f private_key.pem
