@@ -120,7 +120,7 @@ async def get_public_product_detail(
 async def get_product_detail(
     product_id: str,
     request: Request,
-    db: AsyncIOMotorDatabase = Depends(get_db)
+    db: AsyncIOMotorDatabase = Depends(get_product_db)
 ):
     await verify_admin(request)  # 관리자 인증
 
