@@ -55,4 +55,6 @@ dist/
 build/
 *.egg-info/
 
-*.pyc
+# Python cache files
+__pycache__/
+*.pycs
